@@ -13,6 +13,7 @@ aufgaben_und_auswertung/
 ├── build_variants_sortiert.py
 ├── analyse_bausteine.py
 ├── plot_forest_bausteine.py
+├── promptstruktur_und_api_calls.txt ← Ausschnitt des genutzten API-Calls, Dokumentationslinks und Prompt-Struktur
 └── README.md          ← Anleitung zur Reproduktion der Forest Plots und Bausteinvorkommen-Analyse
 analyseaufgaben/
 └── … ← Enthält die automatisiert generierten Skripte für alle 29 Integrationsaufgaben, inkl. Prompts und dazugehörige Mock-Skripte der externen Systeme

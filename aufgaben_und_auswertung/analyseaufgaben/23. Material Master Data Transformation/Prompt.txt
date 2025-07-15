@@ -1,0 +1,350 @@
+Du sollst ein Skript für die Integration von SAP Business ByDesign und SAP S4/Hana Public Cloud erstellen. Es soll Material Master Data importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Decoding:
+-----------
+- Dekodiere den eingehenden Base64-Payload
+
+
+3. Filter:
+------------------
+- Filtere den Payload nach /Workbook/Worksheet
+
+
+4. Struktur:
+------------
+- Der eingehende Payload ist aufgebaut wie eine Tabelle:
+	- Jedes Worksheet hat einen Namen als Attribut (z.B. <Worksheet ss:Name="GTINs">)
+	- Jedes Worksheet hat 1 Header Zeile mit den Spaltenbezeichnungen (immer die 1. Zeile)
+	- Jedes Worksheet hat 1 Datenzeile (2. Zeile) in der die jeweiligen Daten für die Spalten stehen
+		- In der Reihenfolge der Spaltenbezeichnungen
+- Die Quellfelder im Mapping sind folgendermaßen konfiguriert: /Material/{Name des Worksheets}/{Spalte}
+
+
+5. Mapping:
+-------------------
+- Mappe den Payload gemäß den Mapping-Anforderungen
+
+
+6. Encoding:
+-------------------
+- Kodiere den Payload im Base64-Format
+
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+
+/Material/General/MATERIAL_ID, /Material/General/BASE_UOM, /Material/GTINs/MATERIAL_ID, /Material/GTINs/TRADING_UNIT, /Material/GTINs/GTIN -> /Product/BasicData/EAN11
+Transformationsregel:
+- Prüfe, ob General/MATERIAL_ID in der Liste der GTINs/MATERIAL_IDs vorhanden ist und gleichzeitig, ob General/BASE_UOM dem zugehörigen GTINs/TRADING_UNIT entspricht
+- Wenn ja: Gib den entsprechenden GTINs/GTIN Wert als Zielwert aus
+- Wenn nein: Gib einen leeren String als Ergebnis zurück
+
+/Material/General/MATERIAL_ID, /Material/General/BASE_UOM, /Material/UoMCharacteristics/MATERIAL_ID, /Material/UoMCharacteristics/UNIT_OF_MEASURE, /Material/UoMCharacteristics/GROSS_WEIGHT -> /Product/BasicData/BRGEW
+Transformationsregel:
+- Prüfe, ob General/MATERIAL_ID in der Liste der UoMCharacteristics/MATERIAL_IDs vorhanden ist und gleichzeitig, ob General/BASE_UOM dem zugehörigen UoMCharacteristics/UNIT_OF_MEASURE entspricht
+- Wenn ja: Gib den entsprechenden UoMCharacteristics/GROSS_WEIGHT Wert als Zielwert aus
+- Wenn nein: Gib einen leeren String als Ergebnis zurück
+	
+/Material/General/MATERIAL_ID, /Material/General/BASE_UOM, /Material/UoMCharacteristics/MATERIAL_ID, /Material/UoMCharacteristics/UNIT_OF_MEASURE, /Material/UoMCharacteristics/NET_WEIGHT -> /Product/BasicData/NTGEW
+Transformationsregel:
+- Prüfe, ob General/MATERIAL_ID in der Liste der UoMCharacteristics/MATERIAL_IDs vorhanden ist und gleichzeitig, ob General/BASE_UOM dem zugehörigen UoMCharacteristics/UNIT_OF_MEASURE entspricht
+- Wenn ja: Gib den entsprechenden UoMCharacteristics/NET_WEIGHT Wert als Zielwert aus
+- Wenn nein: Gib einen leeren String als Ergebnis zurück
+
+/Material/General/MATERIAL_ID, /Material/General/BASE_UOM, /Material/UoMCharacteristics/MATERIAL_ID, /Material/UoMCharacteristics/UNIT_OF_MEASURE, /Material/UoMCharacteristics/LENGTH -> /Product/BasicData/LAENG
+Transformationsregel:
+- Prüfe, ob General/MATERIAL_ID in der Liste der UoMCharacteristics/MATERIAL_IDs vorhanden ist und gleichzeitig, ob General/BASE_UOM dem zugehörigen UoMCharacteristics/UNIT_OF_MEASURE entspricht
+- Wenn ja: Gib den entsprechenden UoMCharacteristics/LENGTH Wert als Zielwert aus
+- Wenn nein: Gib einen leeren String als Ergebnis zurück
+
+/Material/General/MATERIAL_ID, /Material/General/BASE_UOM, /Material/UoMCharacteristics/MATERIAL_ID, /Material/UoMCharacteristics/UNIT_OF_MEASURE, /Material/UoMCharacteristics/NET_WEIGHT_UOM -> /Product/BasicData/GEWEI
+Transformationsregel:
+- Prüfe, ob General/MATERIAL_ID in der Liste der UoMCharacteristics/MATERIAL_IDs vorhanden ist und gleichzeitig, ob General/BASE_UOM dem zugehörigen UoMCharacteristics/UNIT_OF_MEASURE entspricht
+- Wenn ja: Gib den entsprechenden UoMCharacteristics/NET_WEIGHT_UOM Wert als Zielwert aus
+- Wenn nein: Gib einen leeren String als Ergebnis zurück
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+kein Response Mapping
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="General">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">MATERIAL_ID</Data></Cell>
+        <Cell><Data ss:Type="String">BASE_UOM</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">1001</Data></Cell>
+        <Cell><Data ss:Type="String">EA</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+
+  <Worksheet ss:Name="GTINs">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">MATERIAL_ID</Data></Cell>
+        <Cell><Data ss:Type="String">TRADING_UNIT</Data></Cell>
+        <Cell><Data ss:Type="String">GTIN</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">1001</Data></Cell>
+        <Cell><Data ss:Type="String">Box</Data></Cell>
+        <Cell><Data ss:Type="String">1234567890123</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+
+  <Worksheet ss:Name="UoMCharacteristics">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">MATERIAL_ID</Data></Cell>
+        <Cell><Data ss:Type="String">UNIT_OF_MEASURE</Data></Cell>
+        <Cell><Data ss:Type="String">GROSS_WEIGHT</Data></Cell>
+        <Cell><Data ss:Type="String">NET_WEIGHT</Data></Cell>
+        <Cell><Data ss:Type="String">LENGTH</Data></Cell>
+        <Cell><Data ss:Type="String">NET_WEIGHT_UOM</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">1001</Data></Cell>
+        <Cell><Data ss:Type="String">EA</Data></Cell>
+        <Cell><Data ss:Type="String">5.0</Data></Cell>
+        <Cell><Data ss:Type="String">4.5</Data></Cell>
+        <Cell><Data ss:Type="String">30</Data></Cell>
+        <Cell><Data ss:Type="String">KG</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+</Workbook>
+
+
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+    targetNamespace="urn:schemas-microsoft-com:office:spreadsheet"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <!-- Root Element -->
+  <xs:element name="Workbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Worksheet" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Table">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Row" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Cell" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Data">
+                                  <xs:complexType>
+                                    <xs:simpleContent>
+                                      <xs:extension base="xs:string">
+                                        <xs:attribute ref="ss:Type" use="required"/>
+                                      </xs:extension>
+                                    </xs:simpleContent>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute ref="ss:Name" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Attributes from ss namespace -->
+  <xs:attribute name="Type" type="xs:string"/>
+  <xs:attribute name="Name" type="xs:string"/>
+
+</xs:schema>
+
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="utf-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="BasicData">
+    <Table ss:ExpandedRowCount="10">
+      <Row/>
+      <Row/>
+      <Row/>
+      <Row/>
+      <Row>
+        <Cell><Data ss:Type="String">EAN11</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">BRGEW</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">NTGEW</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">LAENG</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">GEWEI</Data></Cell> <!-- harcoded -->
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">EAN Code</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">Gross Weight</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">Net Weight</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">Length</Data></Cell> <!-- harcoded -->
+        <Cell><Data ss:Type="String">Weight Unit</Data></Cell> <!-- harcoded -->
+      </Row>
+      <Row/>
+      <Row>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">4012345678901</Data></Cell>
+        <Cell><Data ss:Type="String">10.50</Data></Cell>
+        <Cell><Data ss:Type="String">9.80</Data></Cell>
+        <Cell><Data ss:Type="String">35.00</Data></Cell>
+        <Cell><Data ss:Type="String">KG</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+</Workbook>
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  targetNamespace="urn:schemas-microsoft-com:office:spreadsheet"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+  <!-- Root Element -->
+  <xs:element name="Workbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Worksheet" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Table">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Row" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Cell" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Data">
+                                  <xs:complexType>
+                                    <xs:simpleContent>
+                                      <xs:extension base="xs:string">
+                                        <xs:attribute ref="ss:Type" use="required"/>
+                                      </xs:extension>
+                                    </xs:simpleContent>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="ss:AutoFitHeight" type="xs:string" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="ss:ExpandedRowCount" type="xs:integer" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute ref="ss:Name" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- Definition für ss:Name & ss:Type als globale Attribute -->
+  <xs:attribute name="Name" type="xs:string"/>
+  <xs:attribute name="Type" type="xs:string"/>
+
+</xs:schema>
+
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

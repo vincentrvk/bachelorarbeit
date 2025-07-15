@@ -1,0 +1,3 @@
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: groovy.lang.MissingPropertyException: No such property: inboundBody for class: script4__Script@ line 55 in script4.groovy.
+The MPL ID for the failed message is : AGhQTszToYKz50Nb8Z7HHjxVx41j

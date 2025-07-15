@@ -1,0 +1,313 @@
+Du sollst ein Skript für die Integration von SAP Marketing Cloud und CELUM. Es sollen Asset Information geholt werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+keyword_query = 
+
+Properties:
+DAMUser = 
+DAMPassword = 
+DAMURL = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+2. Entscheidung: Request:
+-------------------------
+- Wenn die Input Message den Header keyword_query nicht enthält oder er leer ist (bzw. placeholder Wert hat), führe die Request "Connect" aus
+- Wenn die Input Message den Header keyword_query enthält und er befüllt ist, führe die Request "Search" aus
+
+3a. Request "Connect":
+-----------------
+Adresse: ${property.DAMURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: keinen
+
+Response Handling: 
+- Gib bei erfolgreicher Response den String "connected" zurück
+
+3b. Request "Search":
+-----------------
+Adresse: ${property.DAMURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keyword_query
+Body: keinen
+
+Response Handling: 
+- Behandele die Response gemäß den Mapping-Anforderungen
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfeld -> Zielfeld
+keins
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+
+assetsList -> Assets (Array)
+
+assets/asset -> Objekt im Assets Array
+
+assetId -> ASSET_ID
+
+description -> DESCRIPTION
+
+keywords -> KEYWORDS
+
+fileId -> FILE_ID
+
+url -> URL
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+leerer Body
+
+
+
+
+INPUT RESPONSE MAPPING:
+{
+  "assetsList": {
+    "assets": [
+      {
+        "asset": {
+          "assetId": "asset-001",
+          "description": "Produktbild Sommerkollektion 2025",
+          "variants": [
+            {
+              "fileId": "file-1001",
+              "url": "https://cdn.example.com/assets/asset-001/preview.jpg"
+            },
+            {
+              "fileId": "file-1002",
+              "url": "https://cdn.example.com/assets/asset-001/thumbnail.jpg"
+            }
+          ],
+          "keywords": "sommer,mode,damen"
+        }
+      },
+      {
+        "asset": {
+          "assetId": "asset-002",
+          "description": "Produktbild Winterkollektion 2025",
+          "variants": [
+            {
+              "fileId": "file-2001",
+              "url": "https://cdn.example.com/assets/asset-002/preview.jpg"
+            },
+            {
+              "fileId": "file-2002",
+              "url": "https://cdn.example.com/assets/asset-002/thumbnail.jpg"
+            }
+          ],
+          "keywords": "winter,mode,damen"
+        }
+      }
+    ]
+  }
+}
+
+
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+keins
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AssetsListSchema",
+  "type": "object",
+  "properties": {
+    "assetsList": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "asset": {
+                "type": "object",
+                "properties": {
+                  "assetId": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "variants": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fileId": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      },
+                      "required": ["fileId", "url"]
+                    }
+                  },
+                  "keywords": {
+                    "type": "string"
+                  }
+                },
+                "required": ["assetId", "description", "variants", "keywords"]
+              }
+            },
+            "required": ["asset"]
+          }
+        }
+      },
+      "required": ["assets"]
+    }
+  },
+  "required": ["assetsList"]
+}
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+leerer Body
+
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+{
+  "Assets": [
+    {
+      "ASSET": {
+        "ASSET_ID": "asset-001",
+        "KEYWORDS": "sommer,mode,damen",
+        "DESCRIPTION": "Produktbild Sommerkollektion 2025",
+        "DIGITALASSETFILE": [
+          {
+            "ASSET_ID": "asset-001",
+            "FILE_ID": "file-1001",
+            "URL": "https://cdn.example.com/assets/asset-001/preview.jpg"
+          },
+          {
+            "ASSET_ID": "asset-001",
+            "FILE_ID": "file-1002",
+            "URL": "https://cdn.example.com/assets/asset-001/thumbnail.jpg"
+          }
+        ]
+      }
+    },
+    {
+      "ASSET": {
+        "ASSET_ID": "asset-002",
+        "KEYWORDS": "winter,mode,damen",
+        "DESCRIPTION": "Produktbild Winterkollektion 2025",
+        "DIGITALASSETFILE": [
+          {
+            "ASSET_ID": "asset-002",
+            "FILE_ID": "file-2001",
+            "URL": "https://cdn.example.com/assets/asset-002/preview.jpg"
+          },
+          {
+            "ASSET_ID": "asset-002",
+            "FILE_ID": "file-2002",
+            "URL": "https://cdn.example.com/assets/asset-002/thumbnail.jpg"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+keins
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ASSET": {
+            "type": "object",
+            "properties": {
+              "ASSET_ID": {
+                "type": "string"
+              },
+              "KEYWORDS": {
+                "type": "string"
+              },
+              "DESCRIPTION": {
+                "type": "string"
+              },
+              "DIGITALASSETFILE": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ASSET_ID": {
+                      "type": "string"
+                    },
+                    "FILE_ID": {
+                      "type": "string"
+                    },
+                    "URL": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": ["FILE_ID", "URL"]
+                }
+              }
+            },
+            "required": ["ASSET_ID", "KEYWORDS", "DESCRIPTION", "DIGITALASSETFILE"]
+          }
+        },
+        "required": ["ASSET"]
+      }
+    }
+  },
+  "required": ["Assets"]
+}
+

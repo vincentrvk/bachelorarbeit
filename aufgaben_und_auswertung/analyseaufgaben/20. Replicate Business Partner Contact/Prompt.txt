@@ -1,0 +1,229 @@
+Du sollst ein Skript für die Integration von S4/HANA mit SAP Field Service Management. Es sollen Business Partner Kontakte in SAP Field Service Management importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+enableMultiCompany = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Entscheidung: Multi-Company enabled
+-------------------------------------
+- Wenn ${property.enableMultiCompany} = "true" ist, speichere den Payload gemäß Schritt 3 im DataStore ab
+- Wenn ${property.enableMultiCompany} = "false" ist, schicke den Payload gemäß Schritt 4 an SAP Field Service Management
+
+
+3. Request "Create Contact Person":
+-----------------
+Adresse: ${property.requestURL}/Contact/externalId
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping	
+
+Response Handling: 
+- Löse einen Fehler aus, wenn der HTTP-Response-Code nicht = 200 ist
+
+
+4. Speichern im DataStore
+------------------------
+- Sollte ${property.enableMultiCompany} = "true" sein, so speichere den Payload folgendermaßen im DataStore ab:
+	- Ein einzelnes "CP"-Objekt des Arrays pro Eintrag
+	- DataStore Entry ID = CP.externalId
+	- DataStore Name = BPContacts
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Validierungsregeln:
+keine
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING (Products): 
+Quellfeld -> Zielfeld
+XML -> JSON
+
+/ns0:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/InternalID -> CP.externalId
+
+/ns0:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/GivenName -> CP.firstName
+
+/ns0:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/FamilyName -> CP.lastName
+
+/ns0:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/BlockedIndicator -> CP.inactive
+Transformationsregeln: 
+- Wenn "BlockedIndicator" = "true", nutze "true" als Zielwert
+- Wenn nicht "true", nutze "false" als Zielwert
+
+/ns0:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/SalutationText -> CP.title
+Transformationsregeln:
+- Wenn "SalutationText" befüllt ist, nutze dies als Zielwert
+- Wenn "SalutationText" nicht befüllt ist, erstelle das Zielfeld ohne Wert (leerer String)
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+keins
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<BusinessPartnerSUITEBulkReplicateRequest xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <BusinessPartnerSUITEReplicateRequestMessage>
+    <BusinessPartner>
+      <InternalID>BP12345</InternalID>
+      <Common>
+        <BlockedIndicator>false</BlockedIndicator>
+        <SalutationText>Herr</SalutationText>
+        <Person>
+          <Name>
+            <GivenName>Max</GivenName>
+            <FamilyName>Mustermann</FamilyName>
+          </Name>
+        </Person>
+      </Common>
+    </BusinessPartner>
+  </BusinessPartnerSUITEReplicateRequestMessage>
+</BusinessPartnerSUITEBulkReplicateRequest>
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xsd:element name="BusinessPartnerSUITEBulkReplicateRequest">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="BusinessPartnerSUITEReplicateRequestMessage" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="BusinessPartner" maxOccurs="unbounded">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="InternalID" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="Common" minOccurs="0">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="BlockedIndicator" type="xsd:boolean" minOccurs="0"/>
+                          <xsd:element name="SalutationText" type="xsd:string" minOccurs="0"/>
+                          <xsd:element name="Person" minOccurs="0">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="Name" minOccurs="0">
+                                  <xsd:complexType>
+                                    <xsd:sequence>
+                                      <xsd:element name="GivenName" type="xsd:string" minOccurs="0"/>
+                                      <xsd:element name="FamilyName" type="xsd:string" minOccurs="0"/>
+                                    </xsd:sequence>
+                                  </xsd:complexType>
+                                </xsd:element>
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+{
+  "CP": [
+    {
+      "externalId": "BP12345",
+      "firstName": "Max",
+      "lastName": "Mustermann",
+      "inactive": false,
+      "title": "Herr"
+    }
+  ]
+}
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "CP": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "inactive": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": ["externalId"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["CP"],
+  "additionalProperties": false
+}
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

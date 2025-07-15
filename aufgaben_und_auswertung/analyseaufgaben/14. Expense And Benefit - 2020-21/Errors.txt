@@ -1,0 +1,20 @@
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: SHA-1 Bildung fehlgeschlagen: Cannot invoke method appendNode() on null object@ line 251 in script2.groovy.
+The MPL ID for the failed message is : AGhRejzDg3_VP_hqkOJbBZ8TY20G
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 165: You cannot create an instance from the abstract interface 'groovy.util.Factory'.
+@ line 165, column 19.
+def service = new Factory(com.sap.it.api.asdk.datastore.DataStoreService).getService()
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRe488Zyi4YfHbig2YQhdfmNv0
+
+
+#5:
+Kein Outbound Request geschrieben
+

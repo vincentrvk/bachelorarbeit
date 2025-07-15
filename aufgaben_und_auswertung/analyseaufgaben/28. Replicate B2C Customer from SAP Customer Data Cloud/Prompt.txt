@@ -1,0 +1,456 @@
+Du sollst ein Skript für die Integration von SAP Master Data Integration und SAP Customer Data Cloud erstellen. Es sollen B2C Profildaten von der Customer Data Cloud zum Master Data Management geschickt werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+requestURLMDM = 
+requestUserMDM = 
+requestPasswordMDM = 
+plainHMACKeyForSignature = gekmN8CFr6PngJ9xTGMOMpdTFAvcssg5
+apiKey = API_KEY_PROD1  
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Splitter:
+-----------
+- Führe die nachfolgenden Schritte für jedes "events" Objekt einzeln durch
+
+
+3. JWT-Token Erstellung:
+-----------------------
+- Diese Schritte müssen vor jeder Request ausgeführt werden
+- Der JWT-Token setzt sich wiefolgt zusammen:
+	- jwtHeader = base64encoded({"alg":"RS256","typ":"JWT","kid":"${property.apiKey}"})
+	- jwtClaim = base64encoded({aktueller Unix Timestamp in Sekunden})
+	- JWT-Token = jwtHeader.jwtClaim
+	
+	
+4. Extrahiere Profil UID:
+------------------------
+- Extrahiere aus dem Profil die UID und speichere sie in der Property "profileID"
+- Pfad: eventObjekt.data.uid
+
+
+5. Prüfung Event:
+-----------------------------
+- Prüfe das Event nach den Event-Validierungsregeln
+
+
+6. Extrahiere den AccountType:
+-------------------------
+- Extrahiere den Wert von eventObjekt.data.accountType und speichere ihn in der Property "accountType"
+
+
+7. Request "Get Account":
+-----------------
+Adresse: ${property.requestURL}/${property.accountType}/{property.profileID}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: 
+- "JWT-Token": JWT-Token
+- "CDCSignature": Signierter JWT-Token (HmacSHA256)
+Body: keiner
+
+Response Handling: 
+- JSON Response ist neuer Payload
+- Nutze aus der Response nur das "profile" Objekt als Payload
+
+
+8. Prüfung:
+-----------
+- Prüfe, ob das eingehende Profil die Validierungsregeln erfüllt
+
+
+9. Request "Replicate Profile to MDM":
+-----------------
+Adresse: ${property.requestURL}/{property.profileID}
+Methode: POST
+Authentifizierung: Basic-Authentication (MDM)
+Header:
+Body: Payload nach Response-Mapping
+
+Response Handling: 
+- kein Response Handling
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für die Validierung 
+
+
+Validierungsregeln:
+Event:
+- events.type = "accountCreated", "accountUpdated" oder "accountRegistered"
+
+Profil:
+- "profile" existiert
+- "profile.lastName" existiert
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+keins
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+JSON -> XML
+neue, randomisierte UUID -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/MessageHeader/ID (für ID replace "-" mit "")
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/MessageHeader/UUID
+
+profile.firstName -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/KeyWordsText
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/GivenName
+
+profile.lastName -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/AdditionalKeyWordsText
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/FamilyName
+
+
+emails.verified, emails.verified.email -> /ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email/URI
+Transformationsregel:
+- Wenn emails.verified existiert, erstelle für jede email ein /ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email
+Tag und trage die Email in das Kind-Feld
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email/URI
+ein
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+{
+  "events": [
+    {
+      "type": "accountUpdated",
+      "data": {
+        "uid": "IAM123456",
+        "accountType": "b2c",
+        "email": "lisa.mueller@example.com",
+        "firstName": "Lisa",
+        "lastName": "Müller",
+        "phoneNumber": "+49 171 1234567",
+        "address": {
+          "city": "München",
+          "postalCode": "80331",
+          "country": "DE"
+        }
+      }
+    }
+  ]
+}
+
+
+
+INPUT RESPONSE MAPPING (Prospect):
+{
+  "header": {
+    "messageId": "MSG-20250603-001",
+    "timestamp": "2025-06-03T10:30:00Z"
+  },
+  "results": [
+    {
+      "profile": {
+        "firstName": "Max",
+        "lastName": "Mustermann",
+        "city": "Berlin",
+        "email": "max.mustermann@example.com",
+        "username": "m.mustermann"
+      }
+    },
+    {
+      "opportunityInformation": {
+        "projectType": "IT-Modernisierung",
+        "estimatedBudgetEUR": 250000,
+        "expectedStartDate": "2025-09-01"
+      }
+    },
+	"emails": {
+		"verified": [
+		  {
+			"email": "max.mustermann@example.com",
+			"verified": true,
+			"primary": true
+		  }
+		]
+	}
+  ]
+}
+
+
+
+INPUT RESPONSE MAPPING (Customer):
+{
+   "header":{
+      "messageId":"MSG-20250603-001",
+      "timestamp":"2025-06-03T10:30:00Z"
+   },
+   "profile":{
+      "firstName":"Max",
+      "lastName":"Mustermann",
+      "city":"Berlin",
+      "email":"max.mustermann@example.com",
+      "username":"m.mustermann"
+   },
+   "emails": {
+    "verified": [
+      {
+        "email": "max.mustermann@example.com",
+        "verified": true,
+        "primary": true
+      }
+    ]
+  }
+}
+
+
+Input Schema:
+INPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["accountUpdated"]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string",
+                "pattern": "^IAM\\d{6}$"
+              },
+              "accountType": {
+                "type": "string",
+                "enum": ["b2c", "b2b"]
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string",
+                "pattern": "^\\+\\d{1,3}\\s\\d{1,4}\\s\\d{4,}$"
+              },
+              "address": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  },
+                  "postalCode": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  }
+                },
+                "required": ["city", "postalCode", "country"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "uid",
+              "accountType",
+              "email",
+              "firstName",
+              "lastName",
+              "phoneNumber",
+              "address"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["type", "data"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["events"],
+  "additionalProperties": false
+}
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["messageId", "timestamp"]
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "city": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "username": { "type": "string" }
+      },
+      "required": ["firstName", "lastName", "email"]
+    },
+    "emails": {
+      "type": "object",
+      "properties": {
+        "verified": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email" },
+              "verified": { "type": "boolean" },
+              "primary": { "type": "boolean" }
+            },
+            "required": ["email", "verified"]
+          }
+        }
+      },
+      "required": ["verified"]
+    }
+  },
+  "required": ["header", "profile", "emails"]
+}
+
+
+
+
+
+Output:
+OUTPUT REQUEST MAPPING:
+keins
+
+
+OUTPUT RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<bp:BusinessPartnerSUITEBulkReplicateRequest xmlns:bp="urn:sap-com:document:sap:rfc:functions">
+  <BusinessPartnerSUITEReplicateRequestMessage>
+    <MessageHeader>
+      <UUID>e1f4b7e1-fc2d-4f6f-a0bc-1f56c7f7c888</UUID>
+      <ID>e1f4b7e1fc2d4f6fa0bc1f56c7f7c888</ID>
+    </MessageHeader>
+    <BusinessPartner>
+      <Common>
+        <KeyWordsText>Max</KeyWordsText>
+        <AdditionalKeyWordsText>Mustermann</AdditionalKeyWordsText>
+        <Person>
+          <Name>
+            <GivenName>Max</GivenName>
+            <FamilyName>Mustermann</FamilyName>
+          </Name>
+        </Person>
+      </Common>
+      <AddressIndependentCommInfo>
+        <Email>
+          <URI>max.mustermann@example.com</URI>
+        </Email>
+      </AddressIndependentCommInfo>
+    </BusinessPartner>
+  </BusinessPartnerSUITEReplicateRequestMessage>
+</bp:BusinessPartnerSUITEBulkReplicateRequest>
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+keins
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="BusinessPartnerSUITEBulkReplicateRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BusinessPartnerSUITEReplicateRequestMessage">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MessageHeader">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="UUID" type="xs:string"/>
+                    <xs:element name="ID" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BusinessPartner">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Common">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="KeyWordsText" type="xs:string"/>
+                          <xs:element name="AdditionalKeyWordsText" type="xs:string"/>
+                          <xs:element name="Person">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Name">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="GivenName" type="xs:string"/>
+                                      <xs:element name="FamilyName" type="xs:string"/>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="AddressIndependentCommInfo">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Email" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="URI" type="xs:string"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+

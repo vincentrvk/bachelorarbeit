@@ -1,0 +1,16 @@
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.getAt() is applicable for argument types: (groovy.xml.QName) values: [{http://sap.com/xi/FotETaxUS}TAX_JURISDICTION_SEND]
+Possible solutions: getAt(groovy.lang.IntRange), getAt(int), getAt(int), getAt(int), getAt(java.lang.String), text()@ line 260 in script2.groovy.
+The MPL ID for the failed message is : AGhQIES675F7IllFPV-X7HoeMJnb
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.xml.QName.name() is applicable for argument types: () values: []
+Possible solutions: any(), any(groovy.lang.Closure), wait(), dump(), wait(long), each(groovy.lang.Closure)@ line 342 in script3.groovy.
+The MPL ID for the failed message is : AGhQIMFYbF6FhkaHLyleC3ev8zjI
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im SureTax-Skript: No signature of method: groovy.xml.QName.name() is applicable for argument types: () values: []
+Possible solutions: any(), any(groovy.lang.Closure), wait(), dump(), wait(long), each(groovy.lang.Closure)@ line 271 in script4.groovy.
+The MPL ID for the failed message is : AGhP68Y2XInOLRdX47REOeGIBM4k
+
+#5:

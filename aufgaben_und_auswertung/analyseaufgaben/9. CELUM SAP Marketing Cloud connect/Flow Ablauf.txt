@@ -1,0 +1,22 @@
+Router (ein Pfad direkt Ende)
+
+Content Modifier (leer??)
+
+request
+
+process call (subflow: der ganze rest)
+
+json zu XML converter
+
+splitter
+
+Content modifier 
+(baut Body)
+
+Gather
+
+Content modifier (neues root tag)
+
+XML zu json converter
+
+Ende

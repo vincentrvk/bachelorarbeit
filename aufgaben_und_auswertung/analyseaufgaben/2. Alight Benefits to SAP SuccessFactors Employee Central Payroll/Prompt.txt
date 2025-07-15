@@ -1,0 +1,136 @@
+Du sollst ein Skript für den Import von Mitarbeitern zu SAP SuccessFactors Employee Central Payroll bauen. Der eingehende Body ist eine CSV Datei. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+successFactorsUsername = 
+successFactorsPassword = 
+successFactorsURL = 
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Filtern der Records:
+----------------------
+- Befolge die unten angegebenen Validierungsregeln
+
+3. Umwandlung zu XML:
+--------------------
+Für alle validen Records:
+- Entferne die CSV Header
+- Seperator sind Pipes (|)
+- Ziel XSD ist das unten angegebene Output-Schema
+- Befolge die unten angegebenen Mapping-Anforderungen 
+
+4. Request: "Send Records":
+--------------------------
+Adresse: ${property.successFactorsURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Jede Record muss einzeln abgeschickt werden (jedes "EmployeeBenefitsVendorData"-Element)
+
+5. Handling invalider Records:
+-----------------------------
+Invalide Records werden wieder als CSV zurückgegeben, die für jeden Record eine Zeile mit 2 Headern erstellt:
+Feld -> Header
+PayrollID -> PersonID
+Grund der Invalidierung -> Validation
+- Gründe der Invalidierung sind z.B.: "Missing Start Date", "Missing End Date", "Missing Component Type", oder eine Kombination aus mehreren
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für die Validierung
+
+Mapping-Anforderungen:
+- Root-Tag (RecordList) = "EmployeeBenefitsVendorData_List"
+- Für jeden Eintrag (Record) = EmployeeBenefitsVendorData
+- PayrollID -> EmployeeID
+- ValidityPeriod_StartDate (yyyyMMdd) -> StartDate (yyyy-MM-dd)
+- ValidityPeriod_EndDate (yyyyMMdd) -> EndDate (yyyy-MM-dd)
+- Amount -> Amount (Attribut: currencyCode = "USD")
+- GoalAmount -> GoalAmount (Attribut: currencyCode = "USD")
+
+
+Validierungsregeln:
+- Richtiger Eintrag hat befüllte Felder (mit Regeln): 
+	- ValidityPeriod_StartDate, 
+	- ValidityPeriod_EndDate, 
+	- PayrollID (weniger als 9 Zeichen) 
+		- Wenn PayrollID keine Zahl ist, wird RecordType = "E"
+	- Amount
+	- RecordType ungleich "E"
+
+
+Output: 
+<?xml version="1.0" encoding="UTF-8"?>
+<EmployeeBenefitsVendorData_List>
+    <EmployeeBenefitsVendorData>
+        <EmployeeID>1001</EmployeeID>
+        <EmployeeBenefitData>
+            <ValidityPeriod>
+                <StartDate>2025-01-01</StartDate>
+                <EndDate>2025-12-31</EndDate>
+            </ValidityPeriod>
+            <CompensationComponentTypeID>HEALTH_INSURANCE</CompensationComponentTypeID>
+            <Amount currencyCode="USD">123</Amount>
+            <GoalAmount currencyCode="USD">123<GoalAmount>
+        </EmployeeBenefitData>
+    </EmployeeBenefitsVendorData>
+</EmployeeBenefitsVendorData_List>
+
+
+Output Schema:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="EmployeeBenefitsVendorData_List">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="EmployeeBenefitsVendorData" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="EmployeeID" type="xs:int"/>
+							<xs:element name="EmployeeBenefitData">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ValidityPeriod">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="StartDate" type="xs:date"/>
+													<xs:element name="EndDate" type="xs:date"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="CompensationComponentTypeID" type="xs:string"/>
+										<xs:element name="Amount">
+											<xs:complexType>
+												<xs:attribute name="currencyCode" type="xs:string"/>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="GoalAmount">
+											<xs:complexType>
+												<xs:attribute name="currencyCode" type="xs:string"/>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="PercentageContribution" type="xs:int"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
+
+Input:
+Record_Type|Sequence_Number|ValidityPeriod_StartDate|ValidityPeriod_EndDate|PayrollID|CompenstationComponentTypeID|Amount|GoalAmount|PercentageContribution
+RT01|001|2025-01-01|20251231|PR12345|CCT1001|5000|10000|50%
+RT02|002|2025-06-01|20251231|PR12346|CCT1002|3000|8000|37.5%

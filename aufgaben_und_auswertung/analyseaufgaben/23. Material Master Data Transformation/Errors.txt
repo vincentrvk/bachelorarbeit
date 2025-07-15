@@ -1,0 +1,22 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.attribute() is applicable for argument types: (groovy.xml.QName) values: [{urn:schemas-microsoft-com:office:spreadsheet}Name]
+Possible solutions: attributes()@ line 247 in script1.groovy.
+The MPL ID for the failed message is : AGhSsMaYJhr00Xw1pZv16v1N5Llo
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.attribute() is applicable for argument types: (groovy.xml.QName) values: [{urn:schemas-microsoft-com:office:spreadsheet}Name]
+Possible solutions: attributes()@ line 225 in script2.groovy.
+The MPL ID for the failed message is : AGhSsYo6LaW4jfhkEvjTqjWBPlB0
+
+
+#3:
+Output nicht vollständig
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: [B.decodeBase64() is applicable for argument types: () values: []
+Possible solutions: encodeBase64(), encodeBase64(boolean)@ line 245 in script5.groovy.
+The MPL ID for the failed message is : AGhStWitXLmAsztyWzDYVAhzsvQH
+
+

@@ -1,0 +1,156 @@
+#Dieses Dokument beinhaltet die Code-Ausschnitte, welche notwendig sind um die Arbeit nachzustellen.
+- Die konkrete Implementierung beeinflusst die Reproduzierbarkeit der Arbeit nicht.
+- Für bereitgestellte Bibliotheken (hier nicht genutzt) siehe Dokumentation von OpenAI: https://platform.openai.com/docs/libraries
+- Modell Dokumentation: 
+	- o3: https://platform.openai.com/docs/models/o3
+	- Allgemein: https://platform.openai.com/docs/models
+- Files-Dokumentation: https://platform.openai.com/docs/guides/pdf-files?api-mode=responses
+- Prompt-Dokumentation: https://platform.openai.com/docs/guides/text?api-mode=responses
+						https://platform.openai.com/docs/guides/reasoning?api-mode=responses
+					
+
+
+##Datei Upload - Endpunkt
+const apiUrl = 'https://api.openai.com/v1/files';
+
+
+
+##API-Call - Modell
+async function callOpenAI(prompt) {
+
+	const apiKey = process.env.OPENAI_API_KEY;
+	const apiUrl = "https://api.openai.com/v1/responses";
+
+	const response = await fetch(apiUrl, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		  'Authorization': `Bearer ${apiKey}`
+		},
+		body: JSON.stringify({
+		  model: 'o3-2025-04-16',
+		  input: [
+			{ role: 'developer', content: prompt.systemPrompt },
+			{ role: 'user', 
+			  content: [
+				{
+				  type: "input_text",
+				  text: prompt.userPrompt
+				},
+				{
+				  //PDF File: addMessageAttachmentCodeSnippet
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: AttachmentWrapperClass
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: DatastoreClassesDocumentation
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: HTTPCallExample
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: MessageInterface
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: ReadFromDatastoreExample
+				  type: "input_file",
+				  file_id: "file-idexample"
+				},
+				{
+				  //PDF File: WriteToDatastoreExample
+				  type: "input_file",
+				  file_id: "file-idexample"
+				}
+			  ] 
+			}
+		],
+		  reasoning: {
+			'effort': 'medium'
+			}	
+		})
+	});
+}
+
+
+##Prompt Konstruktion
+
+function craftPrompt(promptData) {
+// Implement the logic to craft the prompt based on the collected fields
+// Return the crafted prompt
+
+const systemPrompt = `Du bist ein Senior-Softwareentwickler für Integrationen in der SAP Cloud Integration und Experte in der Groovy-Skript Programmierung.
+Benutze als Referenz die hinterlegten Dokumentationen, Beispiele und Klassen, sofern notwendig. 
+
+Grundlegende Anforderungen an deine Lösung:
+1. Schreibe deinen Code Modular (siehe Aufgabenstellung). 
+2. Kommentiere jede Funktion in Deutsch. 
+3. Implementiere an jeder relevanten Stelle Error-Handling. Jedes Error Handling soll eine aussagekräftige Log-Nachricht zur eindeutigen Fehlererkennung ausgeben.
+4. Der eingegangene Payload soll bei einem Fehler als Message Attachment String (addAttachmentAsString) weitergegeben werden (Nutze das hinterlegte Code-Snippet für das Error-Handling).
+5. Nutze für die Arbeit mit XML z.B. XML-Parser, XML-Slurper und MarkupBuilder und für JSON z.B. JSON-Parser und JSON-Slurper. 
+6. Achte darauf, dass Variablen- und Feldnamen nicht mit Bezeichnern wie Methoden- oder Schlüssel-Namen kollidieren, insbesondere beim Einsatz von DSLs zur Erzeugung von XML oder JSON, um Namenskonflikte und unerwartetes Verhalten zu vermeiden.
+7. Beachte unbedingt: Die Bibliothek "groovy.util", alle darunterliegenden Klassen und der XmlSlurper müssen nicht mehr von dir importiert werden!
+8. Verwende keine globalen Konstanten oder Variablen!
+9. Vermeide und entferne ungenutzte Importe!
+
+Die Aufgabenstellung besteht aus folgenden Teilen:
+1. Allgemeine Aufgabenbeschreibung
+2. Validierungsregeln
+3. Modularität-Anforderungen
+4. Mapping-Anforderungen
+5. Error-Handling Anpassungen
+6. Input
+7. Gewünschter Output
+8. Input-Schema 
+9. Output-Schema
+
+Hinweis: Achte auf die erforderlichen Felder des Zielschemas und implementiere eine Validierung.
+
+Bevor du beginnst, analysiere alle gegebenen Aufgabenbestandteile ausführlich und komplett. Lass dir Zeit beim Denken und Lösen der Aufgabe.
+Erarbeite eine Lösung für die folgende Aufgabe und prüfe, ob sie die Anforderungen erfüllt, bevor du antwortest. 
+Antworte nur mit dem fertigen Code! Bitte gib deine gesamte Antwort als formatierten Code-Block aus.
+  `
+
+// Null check
+for (const key in promptData) {
+    const currentValue = promptData[key];
+    if (!currentValue || currentValue === '') {
+        promptData[key] = 'Nicht vorhanden';
+    }
+}
+
+  const aufgabenbeschreibung = 'Allgemeine Aufgabenbeschreibung:\n"""\n' + promptData.aufgabenbeschreibung + '\n"""\n';
+    
+  const validierungsregeln = 'Validierungsregeln:\n"""\n' + promptData.validierungsregeln + '\n"""\n';
+
+  const modularitaet = 'Modularität-Anforderungen:\n"""\n' + promptData.modularitaet + '\n"""\n';
+
+  const mappinganforderungen = 'Mapping-Anforderungen:\n"""\n' + promptData.mappinganforderungen + '\n"""\n';
+
+  const errorhandling = 'Error-Handling Anpassungen:\n"""\n' + promptData.errorhandling + '\n"""\n';
+
+  const input = 'Input:\n"""\n' + promptData.input + '\n"""\n';
+
+  const gewueschterOutput = 'Gewünschter Output:\n"""\n' + promptData.gewueschterOutput + '\n"""\n';
+  
+  const inputSchema = 'Input-Schema:\n"""\n' + promptData.inputSchema + '\n"""\n';
+
+  const outputSchema = 'Output-Schema:\n"""\n' + promptData.outputSchema + '\n"""\n';
+
+  const userPrompt = 'Aufgabenstellung:\n\n' + aufgabenbeschreibung + validierungsregeln + modularitaet + mappinganforderungen + errorhandling + input + gewueschterOutput + inputSchema + outputSchema;
+
+  const craftedPrompt = { systemPrompt, userPrompt }
+
+  return craftedPrompt;
+}  
+

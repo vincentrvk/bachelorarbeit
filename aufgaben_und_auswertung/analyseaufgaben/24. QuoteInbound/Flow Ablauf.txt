@@ -1,0 +1,24 @@
+Logging
+
+Handle Quote Request Subflow:
+	- Router, ob //Quote/SubmitQuoteCover/Content vorhanden ist 
+		-wenn ja, process document (2x Decoding, 1 x Encoding usw.)
+		-wenn nein, skip
+	- Process Quote Subflow: Mapping
+	- Logging
+	- Request
+
+Handle Quote Entry Subflow:
+	- Log Response
+	- Original Body
+	- Quote Entry Splitter
+	- Logging
+	- Router, ob Root Entry (//Quote/Items/Item/ParentItemGuid!='')
+		- wenn ja, weiter
+		- wenn nein abbruch für diesen Quote entry
+	- Mapping
+	- Logging
+	- Request
+
+Logging
+	

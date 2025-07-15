@@ -1,0 +1,18 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 172: unexpected token: [ @ line 172, column 41.
+rstItem = parsed[nss.RETURN]?.[nss.item]
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRGMGnn97qBQek_ysoKBAyrrIi
+
+
+#2:
+Response Payload konnte nicht eingelesen werden (Skript sah eigentlich korrekt aus aber es erkennt es nicht) 
+Laut ChatGPT ein Namespace Problem des Parsers
+
+
+#4:
+Response Payload konnte nicht eingelesen werden 

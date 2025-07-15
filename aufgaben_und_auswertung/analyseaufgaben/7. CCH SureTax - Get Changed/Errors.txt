@@ -1,0 +1,33 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 10: unable to resolve class groovy.xml.XmlSlurper
+@ line 10, column 1.
+import groovy.xml.XmlSlurper
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhQMXUG4-vgadHuqoLIXoZ8COd9
+
+
+#2: 
+Response Mapping ist falsch (hat nach == "string" statt "ns0:string" gesucht)
+und kein handling für fehlendes pflichtfeld
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 12: unable to resolve class groovy.xml.XmlSlurper
+@ line 12, column 1.
+import groovy.xml.XmlSlurper
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhQM0xJ9mSa7ZJiL5Abd1dnHUJJ
+
+
+#4:
+wieder Namespace fehler von #2
+
+#5:
+gleicher Namespace Fehler

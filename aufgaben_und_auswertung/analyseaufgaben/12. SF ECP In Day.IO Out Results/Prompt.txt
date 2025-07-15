@@ -1,0 +1,340 @@
+Du sollst ein Skript für die Integration von SAP SuccessFactors Employee Central Payroll erstellen. Es sollen Ergebnisse aus Day.IO importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+p_operacao = 
+p_externalId = request.results.externalId
+p_startDate = request.results.startDate
+p_wageType = request.results.wageType
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Logging:
+-----------
+Der Payload vor der Request wird als Attachment als String an das Message Objekt angehangen
+
+
+3. Request "Set Results":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping (jede result einzeln)
+
+Response Handling: 
+- Response muss gemäß den Mapping-Anforderungen für das Response-Mapping behandelt werden
+
+
+4. Zusammenfassen der Responses:
+--------------------------------
+Alle gemappten Responses werden zusammengefasst und als ein Objekt zurückgegeben
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Jede request.results wird einzeln gemappt
+Quellfeld -> Zielfeld
+JSON -> XML
+
+externalId -> /ns1:ZHR_FGRP_0001/P2010/item/PERNR
+
+wageType -> /ns1:ZHR_FGRP_0001/P2010/item/SUBTY
+
+startDate -> /ns1:ZHR_FGRP_0001/P2010/item/BEGDA
+Transformationsregel:
+- Formatiere das Datum in das Format "yyyy-MM-dd"
+
+quantityHours -> /ns1:ZHR_FGRP_0001/P2010/item/ANZHL
+
+${property.p_operacao} -> /ns1:ZHR_FGRP_0001/TP_OP
+Transformationsregel:
+- Wenn die Property leer ist oder Placeholder beinhaltet, schreibe als Zielwert "I"
+- Ansonsten übermittle die Property als Zielwert
+
+
+
+RESPONSE-MAPPING:
+Jede Response wird einzeln gemappt
+Quellfeld -> Zielfeld
+JSON -> XML
+
+MENSAGEM -> /response/results/message
+
+STATUS -> /response/results/status
+
+${property.p_externalId} -> /response/results/externalId
+
+${property.p_startDate} -> /response/results/startDate
+
+${property.p_wageType} -> /response/results/wageType
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+{
+  "request": {
+    "results": [
+      {
+        "externalId": "EMP001",
+        "startDate": "2025-06-01",
+        "wageType": "1001",
+        "quantityHours": "8.0"
+      },
+      {
+        "externalId": "EMP002",
+        "startDate": "2025-06-02",
+        "wageType": "1002",
+        "quantityHours": "6.5"
+      }
+    ]
+  }
+}
+
+
+INPUT RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ZHR_FGRP_0001Response xmlns="urn:sap-com:document:sap:rfc:functions">
+  <RETURN>
+    <item>
+      <STATUS>S</STATUS>
+      <MENSAGEM>Erfolgreich verarbeitet</MENSAGEM>
+    </item>
+  </RETURN>
+</ZHR_FGRP_0001Response>
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "request": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "externalId": {
+                "type": "string"
+              },
+              "startDate": {
+                "type": "string"
+              },
+              "wageType": {
+                "type": "string"
+              },
+              "quantityHours": {
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": ["results"]
+    }
+  },
+  "required": ["request"]
+}
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+<?xml version='1.0' encoding='UTF-8'?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  <simpleType name="char1">
+    <restriction base="string">
+      <maxLength value="1"/>
+    </restriction>
+  </simpleType>
+  <simpleType name="char220">
+    <restriction base="string">
+      <maxLength value="220"/>
+    </restriction>
+  </simpleType>
+  <complexType name="ZHRE_RETURN">
+    <sequence>
+      <element name="STATUS" type="tns:char1"/>
+      <element name="MENSAGEM" type="tns:char220"/>
+    </sequence>
+  </complexType>
+  <complexType name="ZRETURN_TAB">
+    <sequence>
+      <element name="item" type="tns:ZHRE_RETURN" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+  <element name="ZHR_FGRP_0001Response">
+    <complexType>
+      <sequence>
+        <element name="RETURN" type="tns:ZRETURN_TAB"/>
+      </sequence>
+    </complexType>
+  </element>
+</schema>
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<ZHR_FGRP_0001 xmlns="urn:sap-com:document:sap:rfc:functions">
+  <P2010>
+    <item>
+      <PERNR>12345678</PERNR>
+      <SUBTY>0100</SUBTY>
+      <BEGDA>2025-06-01</BEGDA>
+      <ANZHL>4.50</ANZHL>
+    </item>
+  </P2010>
+  <TP_OP>I</TP_OP>
+</ZHR_FGRP_0001>
+
+
+
+OUTPUT RESPONSE MAPPING:
+{
+  "response": {
+    "results": [
+      {
+        "externalId": "EMP001",
+        "startDate": "2025-06-01",
+        "wageType": "1000",
+        "status": "SUCCESS",
+        "message": "Verarbeitung erfolgreich"
+      }
+    ]
+  }
+}
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           targetNamespace="urn:sap-com:document:sap:rfc:functions" 
+           xmlns:tns="urn:sap-com:document:sap:rfc:functions" 
+           elementFormDefault="qualified">
+  <xs:simpleType name="char4">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="4"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="char1">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="numeric8">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="8"/>
+      <xs:pattern value="\d*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="date10">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10"/>
+      <xs:pattern value="\d\d\d\d-\d\d-\d\d"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="decimal7.2">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="7"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="P2010">
+    <xs:sequence>
+      <xs:element name="PERNR" type="tns:numeric8" minOccurs="0"/>
+      <xs:element name="SUBTY" type="tns:char4" minOccurs="0"/>
+      <xs:element name="BEGDA" type="tns:date10" minOccurs="0"/>
+      <xs:element name="ANZHL" type="tns:decimal7.2" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="P2010_TAB">
+    <xs:sequence>
+      <xs:element name="item" type="tns:P2010" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ZHR_FGRP_0001">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="P2010" type="tns:P2010_TAB" minOccurs="0"/>
+        <xs:element name="TP_OP" type="tns:char1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Response",
+  "type": "object",
+  "properties": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "externalId": {
+                "type": "string"
+              },
+              "startDate": {
+                "type": "string"
+              },
+              "wageType": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["results"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["response"],
+  "additionalProperties": false
+}
+
+
+

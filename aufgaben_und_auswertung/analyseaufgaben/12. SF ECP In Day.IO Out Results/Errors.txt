@@ -1,0 +1,89 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 133: The current scope already contains a variable of the name begda
+@ line 133, column 23.
+BEGDA begda
+^
+
+script1__Script.groovy: 133: unable to resolve class BEGDA
+@ line 133, column 23.
+BEGDA begda
+^
+
+2 errors
+.
+The MPL ID for the failed message is : AGhRKKILplmoai9-PYYcKXkizcc5
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script2__Script.groovy: 14: unable to resolve class groovy.xml.XmlSlurper
+@ line 14, column 1.
+import groovy.xml.XmlSlurper
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRKZV4de4yhlJhssZfM5XXzNG4
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 137: The current scope already contains a variable of the name begda
+@ line 137, column 23.
+BEGDA begda
+^
+
+script3__Script.groovy: 141: The current scope already contains a variable of the name tpOp
+@ line 141, column 15.
+TP_OP tpOp
+^
+
+script3__Script.groovy: 12: unable to resolve class com.sap.gateway.ip.core.customdev.util.MessageLog
+@ line 12, column 1.
+import com.sap.gateway.ip.core.customdev.util.MessageLog
+^
+
+script3__Script.groovy: 137: unable to resolve class BEGDA
+@ line 137, column 23.
+BEGDA begda
+^
+
+script3__Script.groovy: 141: unable to resolve class TP_OP
+@ line 141, column 15.
+TP_OP tpOp
+^
+
+5 errors
+.
+The MPL ID for the failed message is : AGhRKxLGtCiidMLLMpX2H8dqDuoq
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.getAt() is applicable for argument types: (groovy.xml.QName) values: [{urn:sap-com:document:sap:rfc:functions}RETURN]
+Possible solutions: getAt(groovy.lang.IntRange), getAt(int), getAt(int), getAt(int), getAt(java.lang.String), text()@ line 238 in script4.groovy.
+The MPL ID for the failed message is : AGhRL-yozpfg0pNCsiiiXUJVivIK
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Integration-Skript: No signature of method: com.sap.gateway.ip.core.customdev.processor.MessageImpl.setBody() is applicable for argument types: (java.lang.String, java.lang.String) values: [{
+"response": {
+"results": [
+{
+"externalId": "EMP001",
+"startDate": "2025-06-01",
+"wageType": "1001",
+"status": "UNKNOWN",
+"message": "Fehler X."
+},
+{
+"externalId": "EMP002",
+"startDate": "2025-06-02",
+"wageType": "1002",
+"status": "UNKNOWN",
+"message": "Fehler X."
+}
+]
+}
+}, ...]
+Possible solutions: getBody(), setBody(java.lang.Object), getBody(java.lang.Class)@ line 249 in script5.groovy.
+The MPL ID for the failed message is : AGhRMJFHL45..

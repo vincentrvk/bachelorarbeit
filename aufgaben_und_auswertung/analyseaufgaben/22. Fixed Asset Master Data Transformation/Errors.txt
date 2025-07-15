@@ -1,0 +1,24 @@
+#2:
+Falsche Fehlermeldung "Erforderliche Worksheets nicht gefunden" obwohl vorhanden.
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: Fehler im Mapping-Skript: Erforderliche Worksheets nicht gefunden!@ line 199 in script2.groovy.
+The MPL ID for the failed message is : AGhStyTJEWb3_XqCdHAjmoGGi1WM
+
+
+#3:
+fehlende Daten im Output (die hardcoded Daten)
+
+(ganz einfacher Fix) Row {
+                    ['BUKRS','ANLN1','INVENTORY','ANLN2','ANLKL'].each (hier fehlt "it -> "{
+                        Cell { Data('ss:Type':'String', it) }
+                    }
+                }
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.util.NodeList.list() is applicable for argument types: () values: []
+Possible solutions: last(), last(), first(), first(), is(java.lang.Object), asList()@ line 231 in script4.groovy.
+The MPL ID for the failed message is : AGhSuGmZoQMGQsjDA4_KHOnV0mrn
+
+
+#5:
+fehlende Daten im Output (die hardcoded Daten)

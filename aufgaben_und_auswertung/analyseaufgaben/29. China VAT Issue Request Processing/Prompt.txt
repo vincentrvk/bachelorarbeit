@@ -1,0 +1,616 @@
+Du sollst ein Skript für die Integration von SAP Document and Reporting Compliance mit den Chinesischen Steuerbehörden schreiben. Es sollen Mehrwertsteuer Requests bearbeitet werden.
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+digitalSignEnabled = 
+plainHMACKeyForSignature = gekmN8CFr6PngJ9xTGMOMpdTFAvcssg5
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Body aus DataStore:
+---------------------
+- Hole den zu bearbeitenden Payload aus dem globalen "IssueRequest_Storage" DataStore. Nimm 10 Elemente gleichzeitig
+
+
+3. Splitter:
+-----------
+- Führe die nachfolgenden Schritte für jedes "message" Element einzeln durch
+
+
+4. Extrahiere Golden Tax Number:
+-------------------------------
+- Extrahiere den Wert von //TaxNumber in die property "taxNumber"
+
+
+5. Filter:
+-----------
+- Filtere die Nodes, sodass "//GoldenTax" das neue Root-Element ist
+
+
+6. Kodierung:
+-------------
+- Kodiere den Payload im Base64 Format
+
+
+7. Signieren:
+-------------
+- Wenn ${property.digitalSignEnabled} = "true" ist, signiere den eingehenden Payload mittels HMAC-SHA256 und schreibe die Signatur in den Header "signature"
+
+
+8. Request: "POST VAT Issue":
+-----------------------------
+Adresse: ${property.requestURL}/${property.taxNumber}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: 
+- wenn vorhanden: ${property.signature}
+Body: Payload nach Kodierung
+
+Response Handling: 
+- bei erfolgreicher Übermittlung (HTTP-Status: 200) fahre mit dem Response Body mit der Verarbeitung fort
+- bei fehlgeschlagener Übermittlung wirf einen Fehler
+
+
+9. Extrahiere properties:
+-------------------------------
+- Extrahiere aus jedem "//GoldenTax" der Response folgende Property:
+	- "/TaxNumber" unter der Property "taxNo"
+- Extrahiere aus jedem "//GTHeader" der Response folgende Properties: 
+	- "/GoldenTaxNumber" unter der property "goldenTaxNumber"
+	- "/InvoiceType" unter der property "invoiceType"
+	- "/InvoiceMedium" unter der property "invoiceMedium"
+
+
+10. Payload im DataStore ablegen:
+--------------------------------
+- Baue für jeden "//GTHeader" folgenden Payload und lege ihn im DataStore "GoldenTaxDocument_Result" mit der EntryID = ${property.goldenTaxNumber} ab
+- Payload: 
+	"<GoldenTax>
+    <GoldenTaxNumber>${property.GoldenTaxNumber}</GoldenTaxNumber>
+    <CPIStatus>Q</CPIStatus>
+    <OriginalAction>I</OriginalAction>
+    <ReturnPayload>
+        <InvoiceHeader>
+            <OriginalAction>I</OriginalAction>
+            <InvoiceStatus>P</InvoiceStatus>
+            <GoldenTaxNumber>${property.GoldenTaxNumber}</GoldenTaxNumber>
+            <Messages>
+                <ShortMessage>Invoice is pending with query process</ShortMessage>
+            </Messages>
+        </InvoiceHeader>
+    </ReturnPayload>
+</GoldenTax>"
+
+
+11. Payload Transformation:
+------------------------------
+- Mappe den Response Payload gemäß den Mapping Anforderungen
+
+
+12. Speichere den gemappten Output im DataStore:
+----------------------------------------------
+- Speichere den fertig gemappten Response Mapping Output im DataStore: "QueryRequest_Storage" mit der EntryID = "${property.taxNo}"
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+keins
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+
+${property.taxNo} -> /GoldenTax/Control/TaxNumber 
+
+"1" -> /GoldenTax/Control/RetryCount
+
+für jeden "/GoldenTax/Control/GTDocument/GTHeader" -> /GoldenTax/Control/MappingDetail:
+	- ${propery.goldenTaxNumber} -> /GoldenTax/Control/MappingDetail/GoldenTaxNumber
+
+	- ${propery.invoiceType} -> /GoldenTax/Control/MappingDetail/InvoiceType
+
+	- ${propery.invoiceMedium} -> /GoldenTax/Control/MappingDetail/InvoiceMedium
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<GoldenTax xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <TaxNumber>123456789012345</TaxNumber>
+    <TerminalID>TERM001</TerminalID>
+    <SourceSystem>SAP</SourceSystem>
+    <GTDocument>
+      <GTHeader>
+        <GoldenTaxNumber>GTX0001</GoldenTaxNumber>
+        <InvoiceType>N</InvoiceType>
+        <InvoiceMedium>E</InvoiceMedium>
+        <GoodsList>1</GoodsList>
+        <NetAmount>1500.00</NetAmount>
+        <TaxAmount>225.00</TaxAmount>
+        <GTItem>
+          <GoldenTaxItemNumber>001</GoldenTaxItemNumber>
+          <GoodsName>Notebook</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>1000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010101</TaxClassificationNumber>
+        </GTItem>
+        <GTItem>
+          <GoldenTaxItemNumber>002</GoldenTaxItemNumber>
+          <GoodsName>Mouse</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>500.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010102</TaxClassificationNumber>
+        </GTItem>
+      </GTHeader>
+      <GTHeader>
+        <GoldenTaxNumber>GTX0002</GoldenTaxNumber>
+        <InvoiceType>S</InvoiceType>
+        <InvoiceMedium>P</InvoiceMedium>
+        <GoodsList>1</GoodsList>
+        <NetAmount>3000.00</NetAmount>
+        <TaxAmount>450.00</TaxAmount>
+        <GTItem>
+          <GoldenTaxItemNumber>003</GoldenTaxItemNumber>
+          <GoodsName>Monitor</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>2000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010201</TaxClassificationNumber>
+        </GTItem>
+        <GTItem>
+          <GoldenTaxItemNumber>004</GoldenTaxItemNumber>
+          <GoodsName>Keyboard</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>1000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010202</TaxClassificationNumber>
+        </GTItem>
+      </GTHeader>
+    </GTDocument>
+  </Control>
+</GoldenTax>
+
+
+
+INPUT RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<GoldenTax xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Control>
+    <TaxNumber>123456789012345</TaxNumber>
+    <TerminalID>TERM001</TerminalID>
+    <SourceSystem>SAP</SourceSystem>
+    <GTDocument>
+      <GTHeader>
+        <GoldenTaxNumber>GTX0001</GoldenTaxNumber>
+        <InvoiceType>N</InvoiceType>
+        <InvoiceMedium>E</InvoiceMedium>
+        <GoodsList>1</GoodsList>
+        <NetAmount>1500.00</NetAmount>
+        <TaxAmount>225.00</TaxAmount>
+        <GTItem>
+          <GoldenTaxItemNumber>001</GoldenTaxItemNumber>
+          <GoodsName>Notebook</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>1000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010101</TaxClassificationNumber>
+        </GTItem>
+        <GTItem>
+          <GoldenTaxItemNumber>002</GoldenTaxItemNumber>
+          <GoodsName>Mouse</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>500.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010102</TaxClassificationNumber>
+        </GTItem>
+      </GTHeader>
+      <GTHeader>
+        <GoldenTaxNumber>GTX0002</GoldenTaxNumber>
+        <InvoiceType>S</InvoiceType>
+        <InvoiceMedium>P</InvoiceMedium>
+        <GoodsList>1</GoodsList>
+        <NetAmount>3000.00</NetAmount>
+        <TaxAmount>450.00</TaxAmount>
+        <GTItem>
+          <GoldenTaxItemNumber>003</GoldenTaxItemNumber>
+          <GoodsName>Monitor</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>2000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010201</TaxClassificationNumber>
+        </GTItem>
+        <GTItem>
+          <GoldenTaxItemNumber>004</GoldenTaxItemNumber>
+          <GoodsName>Keyboard</GoodsName>
+          <UoM>PCS</UoM>
+          <NetAmount>1000.00</NetAmount>
+          <TaxRate>15.00</TaxRate>
+          <TaxClassificationNumber>1010202</TaxClassificationNumber>
+        </GTItem>
+      </GTHeader>
+    </GTDocument>
+  </Control>
+</GoldenTax>
+
+
+
+Input Schema:
+INPUT-SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+  <xs:element name="GoldenTax">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Control">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TaxNumber" type="TaxNumberType"/>
+              <xs:element name="TerminalID" type="TerminalIDType"/>
+              <xs:element name="SourceSystem" type="SourceSystemType"/>
+              <xs:element name="GTDocument">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="GTHeader">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="GoldenTaxNumber" type="GoldenTaxNumberType"/>
+                          <xs:element name="InvoiceType" type="InvoiceTypeType"/>
+                          <xs:element name="InvoiceMedium" type="InvoiceMediumType"/>
+                          <xs:element name="GoodsList" type="GoodsListType"/>
+                          <xs:element name="NetAmount" type="NetAmountType"/>
+                          <xs:element name="TaxAmount" type="TaxAmountType"/>
+                          <xs:element name="GTItem">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="GoldenTaxItemNumber" type="GoldenTaxItemNumberType"/>
+                                <xs:element name="GoodsName" type="GoodsNameType"/>
+                                <xs:element name="UoM" type="UoMType"/>
+                                <xs:element name="NetAmount" type="NetAmountType"/>
+                                <xs:element name="TaxRate" type="TaxRateType"/>
+                                <xs:element name="TaxClassificationNumber" type="TaxClassificationNumberType"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Simple type definitions -->
+  <xs:simpleType name="TaxNumberType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value=".{15}|.{18}|.{20}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TerminalIDType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="16"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SourceSystemType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoldenTaxNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="20"/>
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="InvoiceTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="S"/>
+      <xs:enumeration value="N"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="InvoiceMediumType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="P"/>
+      <xs:enumeration value="E"/>
+      <xs:enumeration value="F"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoodsListType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="NetAmountType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="17"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxAmountType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="14"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoldenTaxItemNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="20"/>
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoodsNameType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="60"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="UoMType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="16"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxRateType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="9"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxClassificationNumberType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+  <xs:element name="GoldenTax">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Control">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TaxNumber" type="TaxNumberType"/>
+              <xs:element name="TerminalID" type="TerminalIDType"/>
+              <xs:element name="SourceSystem" type="SourceSystemType"/>
+              <xs:element name="GTDocument">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="GTHeader">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="GoldenTaxNumber" type="GoldenTaxNumberType"/>
+                          <xs:element name="InvoiceType" type="InvoiceTypeType"/>
+                          <xs:element name="InvoiceMedium" type="InvoiceMediumType"/>
+                          <xs:element name="GoodsList" type="GoodsListType"/>
+                          <xs:element name="NetAmount" type="NetAmountType"/>
+                          <xs:element name="TaxAmount" type="TaxAmountType"/>
+                          <xs:element name="GTItem">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="GoldenTaxItemNumber" type="GoldenTaxItemNumberType"/>
+                                <xs:element name="GoodsName" type="GoodsNameType"/>
+                                <xs:element name="UoM" type="UoMType"/>
+                                <xs:element name="NetAmount" type="NetAmountType"/>
+                                <xs:element name="TaxRate" type="TaxRateType"/>
+                                <xs:element name="TaxClassificationNumber" type="TaxClassificationNumberType"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Simple type definitions -->
+  <xs:simpleType name="TaxNumberType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value=".{15}|.{18}|.{20}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TerminalIDType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="16"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SourceSystemType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoldenTaxNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="20"/>
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="InvoiceTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="S"/>
+      <xs:enumeration value="N"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="InvoiceMediumType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="P"/>
+      <xs:enumeration value="E"/>
+      <xs:enumeration value="F"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoodsListType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="NetAmountType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="17"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxAmountType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="14"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoldenTaxItemNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="20"/>
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GoodsNameType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="60"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="UoMType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="16"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxRateType">
+    <xs:restriction base="xs:decimal">
+      <xs:totalDigits value="9"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TaxClassificationNumberType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
+
+
+
+Output:
+OUTPUT REQUEST MAPPING:
+keins
+
+
+OUTPUT RESPONSE MAPPING:
+<GoldenTax>
+  <Control>
+    <TaxNumber>91350200747176340Y</TaxNumber>
+	<RetryCount>1</RetryCount>
+    <MappingDetail>
+      <GoldenTaxNumber>GTX-2025-001</GoldenTaxNumber>
+      <InvoiceType>N</InvoiceType>
+      <InvoiceMedium>E</InvoiceMedium>
+    </MappingDetail>
+    <MappingDetail>
+      <GoldenTaxNumber>GTX-2025-002</GoldenTaxNumber>
+      <InvoiceType>S</InvoiceType>
+      <InvoiceMedium>P</InvoiceMedium>
+    </MappingDetail>
+  </Control>
+</GoldenTax>
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+keins
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+  <xs:element name="GoldenTax">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TaxNumber" type="xs:string"/>
+		<xs:element name="RetryCount" type="xs:string"/>
+        <xs:element name="MappingDetail" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GoldenTaxNumber" type="xs:string"/>
+              <xs:element name="InvoiceType" type="xs:string"/>
+              <xs:element name="InvoiceMedium" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+
+

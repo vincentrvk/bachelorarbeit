@@ -1,0 +1,27 @@
+#1: com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Script: No signature of method: groovy.xml.MarkupBuilderHelper.attribute() is applicable for argument types: (java.lang.String, java.lang.String) values: [currencyCode, USD]@ line 222 in script1.groovy.
+The MPL ID for the failed message is : AGhJg8XXp6s1tjSgeN8KYOZFq_JZ
+
+#3:
+
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 192: unexpected token: Boolean @ line 192, column 9.
+private Boolean String.isInteger() { return this ==~ /\d+/ }
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhJit0onl2p95ApN_UHaSBA0UvK
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 169: unexpected token: boolean @ line 169, column 16.
+private static boolean String.isInteger() {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhJjB-y68NvgjqhPQSux5lQweCI
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Employee-Import-Skript: No signature of method: groovy.xml.MarkupBuilderHelper.attribute() is applicable for argument types: (java.lang.String, java.lang.String) values: [currencyCode, USD]@ line 214 in script5.groovy.
+The MPL ID for the failed message is : AGhJjQjGxz-v84KIdrw_z8oMc4uv

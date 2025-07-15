@@ -1,0 +1,48 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Processing-Skript: No signature of method: java.lang.Boolean.toInteger() is applicable for argument types: () values: []@ line 263 in script1.groovy.
+The MPL ID for the failed message is : AGhRkKk6h-QurvfFT5roiq4WF80M
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script2__Script.groovy: 163: The current scope already contains a variable of the name mappedType
+@ line 163, column 39.
+DisplayValue mappedType
+^
+
+script2__Script.groovy: 163: unable to resolve class DisplayValue
+@ line 163, column 39.
+DisplayValue mappedType
+^
+
+2 errors
+.
+The MPL ID for the failed message is : AGhRkUf5Qn6zELODmeH72rx_sXgx
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 135: unexpected token: ( @ line 135, column 94.
+oductNode.ProductTypeCode.text())
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRkqlgPypszQtMK-K1UCF5LfIx
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 147: expecting '}', found ')' @ line 147, column 92.
+t()?.equalsIgnoreCase('true'))).toString
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRk2sepa6gPfsWRXQstzI2ac2_
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: java.util.ArrayList.toInteger() is applicable for argument types: () values: []
+Possible solutions: toUnique(), toUnique()@ line 288 in script5.groovy.
+The MPL ID for the failed message is : AGhRk-SHMQi-r-OVEnKe8loF6juk

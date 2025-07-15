@@ -1,0 +1,15 @@
+Logging
+
+Properties
+
+Verify Input
+
+Check Address (SureTax oder SureAddress)
+
+Router
+
+jeweils: Mapping + Content Modifier (URL festlegen Tax/Address) + logging + Request + logging + zurück-mapping
+
+logging Outbound
+
+fertig

@@ -1,0 +1,418 @@
+Du sollst ein Skript für die Integration von S/4HANA Cloud und CCH Sure Tax bauen. In dieser Integration soll die Steuer berechnet werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+sureTaxUsername = 
+sureTaxPassword = 
+sureTaxURL = 
+exchageCurrencyDecimal = TAX_CALCULATION_SEND/CALCULATION_HEADER/CURR_DEC/text()
+exchangeTransTypeCode = 
+exchangeTTCodeValueMap = {
+  "1001": "TT01",
+  "1002": "TT02",
+  "1003": "TT03"
+}
+currencyDecimalStr = 
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+2. Request: "Send to SureTax":
+-----------------
+Adresse: ${property.sureTaxURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping
+
+Response Handling: 
+- Die Antwort muss gemäß den Regeln des Response-Mappings behandelt werden
+
+3. Logging:
+----------------------
+- Folgende Schritte müssen geloggt und als Message-Attachment (als String) angehangen werden:
+	1. Eingehender Payload
+	2. Nach dem Request-Mapping 
+	3. Response Payload
+	4. Nach dem RESPONSE-MAPPING
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfelder -> Zielfelder:
+
+CURR_DEC (trim) -> /ns1:SoapRequest/ns1:request/*CurrencyDecimal
+
+AMOUNT, FREIGHT_AM -> /ns1:SoapRequest/ns1:request/ns1:TotalRevenue
+Transformationslogik:
+- Der Gesamtwert (total) berechnet sich aus der Summe aller Einträge aus amount[] und freight[].
+- Jeder Wert wird zunächst mit getNegativeNormal(String) verarbeitet, um negative Formate zu normalisieren.
+- Anschließend wird er in einen BigDecimal umgewandelt.
+- Die Zahl wird durch 10^currencyDecimalInt geteilt, wobei currencyDecimalInt standardmäßig 2 ist.
+- Falls die Property "exchageCurrencyDecimal" im MappingContext vorhanden ist, nimm diesen Wert passe entsprechend an (currencyDecimalVal = 10^currencyDecimalInt).
+- Diese Skalierung wird für jedes Element aus den Arrays amount und freight durchgeführt.
+- Fehlerhafte oder ungültige Werte (z. B. nicht parsebare Strings) werden übersprungen.
+- Die finale Summe wird mit BigDecimal.ROUND_HALF_EVEN auf currencyDecimalInt Dezimalstellen gerundet.
+- Rückgabe erfolgt als String
+
+ITEM_NO, ${property.exchangeTransTypeCode} -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/*transTypeCode
+Transformationslogik: 
+- Wenn es in der Map exchangeTTCodeValueMap (aus dem MappingContext) einen Eintrag für itemNo gibt: Gib den zugehörigen Transaktionstyp-Code zurück.
+- Sonst, wenn defaultTransTypeCode vorhanden und nicht leer ist: Gib defaultTransTypeCode zurück
+- Wenn nichts davon zutrifft: Gib einen leeren String zurück.
+
+AMOUNT, CurrencyDecimal (ist ein Zielfeld) -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/ns1:Revenue
+Regel AMOUNT: 
+Wenn der Eingabewert null ist: gib "" zurück. Wenn der Wert mit einem Minuszeichen am Ende endet (z. B. "500-"): setze das Minuszeichen an den Anfang (z.B. "-500"). In allen anderen Fällen: gib den getrimmten Originalwert zurück
+Regel CurrencyDecimal: 
+Standardwert: currencyDecimalToNumber = 100 (entspricht 10²)
+Wenn currencyDecimal nicht leer und eine gültige Zahl ist:
+Konvertiere sie in int
+Berechne 10 ^ currencyDecimalNumber (z. B. 3: 1000)
+Bei Fehlern (z. B. ungültige Eingabe) bleibt der Standardwert erhalten
+Transformationslogik: 
+- Rückgabe erfolgt als String: Teile das Ergebnis von AMOUNT durch das Ergebnis von CurrencyDecimal 
+
+EXEMPT_AMT, AMOUNT -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/ns1:TaxExemptionCodeList/ns1:string
+Regel EXEMPT_AMT: Wenn EXEMPT_AMT existiert, nimm den Wert, ansonsten nutze eine "0"
+Transformationslogik: 
+- Negativform bereinigen: Beide Eingabewerte (AMOUNT, EXEMPT_AMT) werden mit getNegativeNormal() in normales Zahlenformat gebracht.
+- Dezimalstellen bestimmen:
+	- Standard: 2 Stellen: Faktor 100
+	- Falls verfügbar, wird exchageCurrencyDecimal aus dem Kontext gelesen und currencyDecimalVal = 10^AnzahlDezimalstellen gesetzt.
+- Befreiungsbetrag prüfen:
+	- EXEMPT_AMT wird durch currencyDecimalVal geteilt.
+	- Wenn das Ergebnis 0 ist: Rückgabe: "00", sonst
+- Befreiungsprozentsatz berechnen:
+	- AMOUNT ebenfalls skalieren.
+	- Prozentsatz berechnen: EXEMPT_AMT / AMOUNT (absolut).
+	- Rückgabe im Format: "06:[Prozentsatz]"
+
+---
+
+RESPONSE-MAPPING:
+Quellfelder -> Zielfelder
+
+ns1:TaxAmount, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/CALCULATION_RESULT_ITEM/TAXAMOV
+Transformationslogik:
+- Bilde die Summe aus allen TaxAmount in TaxAmountList
+- Berechne den Skalierungsfaktor mithilfe von ${property.exchangeCurrencyDecimal}:
+	- Standardwerte: currencyDecimalInt = 2: entspricht 2 Nachkommastellen, currencyDecimalVal = 100: entspricht 10^2
+	- Property lesen: Hole den String-Wert aus ${property.exchangeCurrencyDecimal}
+	- Umwandeln und berechnen: Parse den String zu int: currencyDecimalInt = 3, Berechne den Faktor: z.B. currencyDecimalVal = 10 ^ 3 = 1000
+- Skalierungsfaktor mit Summe der TaxAmounts multiplizieren
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:LineNumber, ns1:Tax, ns1:TaxTypeCode -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/ITEM_NO
+Transformationslogik: 
+- Schreibe den Wert von ns1:LineNumber für jedes ns1:Tax das vorkommt
+
+ns1:Revenue, ns1:NumberOfTaxes, ns1:NumberOfGroups, ns1:PercentTaxable, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/EXAMT
+Transformationslogik:
+- Berechnung exemptAmount:
+	- Konvertiere numberOfGroups zu int: groupCount
+	- Konvertiere numberOfTaxes zu int: taxCount
+	- Berechne: countOfGroupTax = taxCount / groupCount 
+	- Konvertiere die Summe aus allen ns1:Revenue zu BigDecimal und teile durch countOfGroupTax
+- multipliziere exemptAmount mit ns1:PercentTaxable und ziehe das Ergebnis von exemptAmount selbst ab
+- Berechne den Skalierungsfaktor mithilfe von ${property.exchangeCurrencyDecimal}:
+	- Standardwerte: currencyDecimalInt = 2: entspricht 2 Nachkommastellen, currencyDecimalVal = 100: entspricht 10^2
+	- Property lesen: Hole den String-Wert aus ${property.exchangeCurrencyDecimal}
+	- Umwandeln und berechnen: Parse den String zu int: currencyDecimalInt = 3, Berechne den Faktor: z.B. currencyDecimalVal = 10 ^ 3 = 1000
+- das Ergebnis der Subtraktion mit dem Skalierungsfaktor multiplizieren
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:TaxAmount, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/TAXAMT
+Transformationslogik:
+- Bilde die Summe aller TaxAmounts und multipliziere sie mit dem Skalierungsfaktor (wie oben berechnet)
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:ExemptCode -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/EXCODE
+
+
+Validierungsregeln:
+
+
+Input:
+INPUT PAYLOAD REQUEST-MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<TAX_CALCULATION_SEND xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <CALCULATION_HEADER>
+        <CURR_DEC>002</CURR_DEC>
+    </CALCULATION_HEADER>
+    <CALCULATION_ITEM>
+        <ITEM_NO>000001</ITEM_NO>
+        <AMOUNT>10000</AMOUNT>
+        <FREIGHT_AM>1500</FREIGHT_AM>
+        <EXEMPT_AMT>2000</EXEMPT_AMT>
+    </CALCULATION_ITEM>
+    <CALCULATION_ITEM>
+        <ITEM_NO>000002</ITEM_NO>
+        <AMOUNT>5000</AMOUNT>
+        <FREIGHT_AM>500</FREIGHT_AM>
+        <EXEMPT_AMT>0</EXEMPT_AMT>
+    </CALCULATION_ITEM>
+</TAX_CALCULATION_SEND>
+
+INPUT RESPONSE-MAPPING:
+<SoapRequestResponse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SoapRequestResult>
+    <GroupList>
+      <Group>
+        <LineNumber>001</LineNumber>
+        <TaxList>
+          <Tax>
+            <TaxTypeCode>VAT</TaxTypeCode>
+            <ExemptCode>EX01</ExemptCode>
+            <TaxAmount>15.00</TaxAmount>
+            <Revenue>100.00</Revenue>
+            <PercentTaxable>0.15</PercentTaxable>
+            <NumberOfTaxes>2</NumberOfTaxes>
+            <NumberOfGroups>1</NumberOfGroups>
+          </Tax>
+          <Tax>
+            <TaxTypeCode>LOCAL</TaxTypeCode>
+            <ExemptCode>EX02</ExemptCode>
+            <TaxAmount>5.00</TaxAmount>
+            <Revenue>50.00</Revenue>
+            <PercentTaxable>0.10</PercentTaxable>
+            <NumberOfTaxes>2</NumberOfTaxes>
+            <NumberOfGroups>1</NumberOfGroups>
+          </Tax>
+        </TaxList>
+      </Group>
+    </GroupList>
+  </SoapRequestResult>
+</SoapRequestResponse>
+
+
+
+
+Input-Schema:
+INPUT PAYLOAD SCHEMA REQUEST-MAPPING:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="CALCULATION_HEADER">
+    <xsd:sequence>
+      <xsd:element name="CURR_DEC">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:length value="3"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="CALCULATION_ITEM">
+    <xsd:sequence>
+      <xsd:element name="ITEM_NO">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:length value="6"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element name="AMOUNT" minOccurs="0">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:maxLength value="15"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element name="FREIGHT_AM" minOccurs="0">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:maxLength value="15"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element name="EXEMPT_AMT" minOccurs="0">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:maxLength value="15"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TAX_CALCULATION_SEND">
+    <xsd:sequence>
+      <xsd:element name="CALCULATION_HEADER" type="CALCULATION_HEADER"/>
+      <xsd:element name="CALCULATION_ITEM" type="CALCULATION_ITEM" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="TAX_CALCULATION_SEND" type="TAX_CALCULATION_SEND"/>
+</xsd:schema>
+
+INPUT SCHEMA RESPONSE-MAPPING:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="Tax">
+    <xsd:sequence>
+      <xsd:element name="TaxTypeCode" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="ExemptCode" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="TaxAmount" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="Revenue" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="PercentTaxable" type="xsd:decimal" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="NumberOfTaxes" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="NumberOfGroups" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ArrayOfTax">
+    <xsd:sequence>
+      <xsd:element name="Tax" type="Tax" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Group">
+    <xsd:sequence>
+      <xsd:element name="LineNumber" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="TaxList" type="ArrayOfTax" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ArrayOfGroup">
+    <xsd:sequence>
+      <xsd:element name="Group" type="Group" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Response">
+    <xsd:sequence>
+      <xsd:element name="GroupList" type="ArrayOfGroup" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="SoapRequestResponse">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="SoapRequestResult" type="Response" minOccurs="0" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
+
+
+Output: 
+OUTPUT REQUEST-MAPPING:
+<soapenv:SoapRequest xmlns:soapenv="http://namespace-placeholder">
+  <soapenv:request>
+    <soapenv:CurrencyDecimal>002</soapenv:CurrencyDecimal>
+    <soapenv:TotalRevenue>170.00</soapenv:TotalRevenue>
+    <soapenv:ItemList>
+      <soapenv:Item>
+        <soapenv:transTypeCode>TX01</soapenv:transTypeCode>
+        <soapenv:Revenue>100.00</soapenv:Revenue>
+        <soapenv:TaxExemptionCodeList>
+          <soapenv:string>06:0.2</soapenv:string>
+        </soapenv:TaxExemptionCodeList>
+      </soapenv:Item>
+      <soapenv:Item>
+        <soapenv:transTypeCode>DEFAULT_TX</soapenv:transTypeCode>
+        <soapenv:Revenue>50.00</soapenv:Revenue>
+        <soapenv:TaxExemptionCodeList>
+          <soapenv:string>00</soapenv:string>
+        </soapenv:TaxExemptionCodeList>
+      </soapenv:Item>
+    </soapenv:ItemList>
+  </soapenv:request>
+</soapenv:SoapRequest>
+
+OUTPUT RESPONSE-MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<TAX_CALCULATION_RECEIVE xmlns="http://sap.com/xi/FotETaxUS">
+  <CALCULATION_RESULT_ITEM>
+    <TAXAMOV>12345.67</TAXAMOV>
+  </CALCULATION_RESULT_ITEM>
+  <RESULT_ITEM_JUR>
+    <ITEM_NO>000001</ITEM_NO>
+    <EXAMT>100.00</EXAMT>
+    <TAXAMT>50.00</TAXAMT>
+    <EXCODE>06</EXCODE>
+  </RESULT_ITEM_JUR>
+  <RESULT_ITEM_JUR>
+    <ITEM_NO>000002</ITEM_NO>
+    <EXAMT>0.00</EXAMT>
+    <TAXAMT>20.00</TAXAMT>
+    <EXCODE>00</EXCODE>
+  </RESULT_ITEM_JUR>
+</TAX_CALCULATION_RECEIVE>
+
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST-MAPPING:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="TaxExemptionCodeListType">
+    <xsd:sequence>
+      <xsd:element name="string" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ItemType">
+    <xsd:sequence>
+      <xsd:element name="transTypeCode" type="xsd:string"/>
+      <xsd:element name="Revenue" type="xsd:string"/>
+      <xsd:element name="TaxExemptionCodeList" type="TaxExemptionCodeListType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ItemListType">
+    <xsd:sequence>
+      <xsd:element name="Item" type="ItemType" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="RequestType">
+    <xsd:sequence>
+      <xsd:element name="CurrencyDecimal" type="xsd:string"/>
+      <xsd:element name="TotalRevenue" type="xsd:string"/>
+      <xsd:element name="ItemList" type="ItemListType"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="SoapRequest" type="RequestType"/>
+</xsd:schema>
+
+OUTPUT SCHEMA RESPONSE-MAPPING:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://sap.com/xi/FotETaxUS">
+  <xsd:element name="TAX_CALCULATION_RECEIVE" type="TAX_CALCULATION_RECEIVE"/>
+  <xsd:complexType name="CALCULATION_RESULT_ITEM">
+    <xsd:sequence>
+      <xsd:element name="TAXAMOV" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="RESULT_ITEM_JUR">
+    <xsd:sequence>
+      <xsd:element name="ITEM_NO" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="EXAMT" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="TAXAMT" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="EXCODE" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>  
+  <xsd:complexType name="TAX_CALCULATION_RECEIVE">
+    <xsd:sequence>
+      <xsd:element name="CALCULATION_RESULT_ITEM" type="CALCULATION_RESULT_ITEM" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="RESULT_ITEM_JUR" type="RESULT_ITEM_JUR" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>
+
+
+
+
+
+

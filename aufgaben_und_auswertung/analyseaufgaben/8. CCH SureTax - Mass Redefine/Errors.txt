@@ -1,0 +1,15 @@
+#1:
+Namespaces wurden beim Response Mapping ignoriert
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.getAt() is applicable for argument types: (groovy.xml.QName) values: [{http://sap.com/xi/FotETaxUS}LOCATION_SIMPLE]
+Possible solutions: getAt(groovy.lang.IntRange), getAt(int), getAt(int), getAt(int), getAt(java.lang.String), text()@ line 280 in script2.groovy.
+The MPL ID for the failed message is : AGhQOgWsobiak4kmhfUbvIQyThvc
+
+#4:
+Request Mapping nicht korrekt
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: script5__Script$_initEnvironment_closure1.call() is applicable for argument types: (java.lang.String, java.util.LinkedHashMap) values: [stateMap, [00:US, 01:AL, 02:AK, 03:AL, 04:AZ, 05:AR, 06:CA]]
+Possible solutions: any(), any(), doCall(java.lang.String, java.lang.String), find(), dump(), grep()@ line 260 in script5.groovy.
+The MPL ID for the failed message is : AGhQPh3v0KhNvaxjPu_3-2OJDpOQ

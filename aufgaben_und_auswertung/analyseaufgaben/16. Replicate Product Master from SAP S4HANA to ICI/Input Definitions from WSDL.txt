@@ -1,0 +1,195 @@
+<xsd:complexType name="ProductMDMReplicateRequestProduct">
+	<xsd:sequence>
+		<xsd:element name="ProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="UnformattedProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="ProductUUID" minOccurs="0" type="UUID"/>
+		<xsd:element name="ReceiverProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="UnformattedReceiverProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="ReceiverProductUUID" minOccurs="0" type="UUID"/>
+		<xsd:element name="ProductTypeCode" minOccurs="0" type="ProductMDMTypeCode"/>
+		<xsd:element name="IndustrySectorCode" minOccurs="0" type="ProductIndustrialSectorCode"/>
+		<xsd:element name="RetailProductCategoryCode" minOccurs="0" type="RetailProductCategoryCode"/>
+		<xsd:element name="DivisionCode" minOccurs="0" type="DivisionCode"/>
+		<xsd:element name="DeletedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="LockedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ANPCode" minOccurs="0" type="ANPCode"/>
+		<xsd:element name="SerialNumberExplicitnessLevelCode" minOccurs="0" type="SerialNumberExplicitnessLevelCode"/>
+		<xsd:element name="QualityManagementInProcurementIsActiveIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ProductAllocationProcedureID" minOccurs="0" type="ProductAllocationProcedureID"/>
+		<xsd:element name="ReceiverProductAllocationProcedureID" minOccurs="0" type="ProductAllocationProcedureID"/>
+		<xsd:element name="ConfigurableProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="ReceiverConfigurableProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="ProductHierarchyInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="ReceiverProductHierarchyInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="ProductGroupInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="ReceiverProductGroupInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="ExternalProductGroupInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="ReceiverExternalProductGroupInternalID" minOccurs="0" type="NOSC_ProductCategoryInternalID"/>
+		<xsd:element name="BaseMeasureUnitCode" minOccurs="0" type="MeasureUnitCode"/>
+		<xsd:element name="ProductDiscountInKindCode" minOccurs="0" type="ProductDiscountInKindCode"/>
+		<xsd:element name="DesignOfficeCode" minOccurs="0" type="ProductDesignOfficeCode"/>
+		<xsd:element name="AuthorisationGroupCode" minOccurs="0" type="AuthorisationGroupCode"/>
+		<xsd:element name="EnvironmentRelevanceIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="BasicProductCode" minOccurs="0" type="BasicProductCode"/>
+		<xsd:element name="ProductSalesProcessUsabilityProfileCode" minOccurs="0" type="ProductSalesProcessUsabilityProfileCode"/>
+		<xsd:element name="DangerousGoodsIndicatorProfileCode" minOccurs="0" type="DangerousGoodsIndicatorProfileCode"/>
+		<xsd:element name="BatchManagementRequiredIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ComputerAidedDesignMaintainedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="BasicViewMaintainedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ConfigurableProductDeterminedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ProductSalesProcessUsabilityProfileValidityDate" minOccurs="0" type="Date"/>
+		<xsd:element name="ProductionText" minOccurs="0" type="LANGUAGEINDEPENDENT_MEDIUM_Text"/>
+		<xsd:element name="ProductSizeText" minOccurs="0" type="LANGUAGEINDEPENDENT_MEDIUM_Text"/>
+		<xsd:element name="ProductionMemoPageFormatName" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Name"/>
+		<xsd:element name="PreviousName" minOccurs="0" type="LANGUAGEINDEPENDENT_MEDIUM_Name"/>
+		<xsd:element name="IndustryStandardDescription" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Description"/>
+		<xsd:element name="ValidityStartDate" minOccurs="0" type="Date"/>
+		<xsd:element name="ProductHandlingIndicatorCode" minOccurs="0" type="ProductHandlingIndicatorCode"/>
+		<xsd:element name="AdjustmentProfileCode" minOccurs="0" type="AdjustmentProfileCode"/>
+		<xsd:element name="HandlingUnitTypeCode" minOccurs="0" type="HandlingUnitTypeCode"/>
+		<xsd:element name="ManufacturerPartProfileCode" minOccurs="0" type="ManufacturerPartProfileCode"/>
+		<xsd:element name="SmartFormName" minOccurs="0" type="SmartFormName"/>
+		<xsd:element name="ItemCategoryGroupCode" minOccurs="0" type="ItemCategoryGroupCode"/>
+		<xsd:element name="WarehouseStorageConditionCode" minOccurs="0" type="WarehouseStorageConditionCode"/>
+		<xsd:element name="WarehouseProductGroupCode" minOccurs="0" type="WarehouseProductGroupCode"/>
+		<xsd:element name="StandardHandlingUnitTypeCode" minOccurs="0" type="HandlingUnitTypeCode"/>
+		<xsd:element name="ProductHighlyViscousIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="TransportInBulkIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ProductRelevantForHazardousSubstancesIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="VariableTareWeightIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="OwnInventoryManagedProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="PackingReferenceProductInternalID" minOccurs="0" type="NOSC_ProductInternalID"/>
+		<xsd:element name="ApprovedBatchRecordRequiredIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ProductEffectivityParameterValuesAssignmentIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="ProductDocumentPageNumber" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="ProductDocumentType" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="GlobalTradeItemNumberVariant" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="ProductDocumentChangeNumber" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="ProductDocumentVersion" minOccurs="0" type="LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="OvercapacityTolerance" minOccurs="0" type="Value"/>
+		<xsd:element name="MaximumCapacity" minOccurs="0" type="Value"/>
+		<xsd:element name="ProductDocumentPageCount" minOccurs="0" type="Value"/>
+		<xsd:element name="SerialIdentifierAssignmentProfileCode" minOccurs="0" type="SerialIdentifierAssignmentProfileCode"/>
+		<xsd:element name="ProductOriginCountryCode" minOccurs="0" type="CountryCode"/>
+		<xsd:element name="CompetitorID" minOccurs="0" type="BusinessPartnerInternalID"/>
+		<xsd:element name="ProductDocumentPageFormat" minOccurs="0" type="xi1:LANGUAGEINDEPENDENT_SHORT_Text"/>
+		<xsd:element name="ProductDocumentNumber" minOccurs="0" type="LANGUAGEINDEPENDENT_MEDIUM_Text"/>
+		<xsd:element name="PilferableIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="PackagingMaterialGroupCode" minOccurs="0" type="PackagingMaterialGroupCode"/>
+		<xsd:element name="QualityInspectionGroupCode" minOccurs="0" type="QualityInspectionGroupCode"/>
+		<xsd:element name="CatalogProfileCode" minOccurs="0" type="CatalogProfileCode"/>
+		<xsd:element name="QuarantinePeriod" minOccurs="0" type="Quantity"/>
+		<xsd:element name="MaximumPackagingHeight" minOccurs="0" type="Quantity"/>
+		<xsd:element name="MaximumPackagingWidth" minOccurs="0" type="Quantity"/>
+		<xsd:element name="MaximumPackagingLength" minOccurs="0" type="Quantity"/>
+		<xsd:element name="MaximumPackagingUnitCode" minOccurs="0" type="MeasureUnitCode"/>
+		<xsd:element name="NetContent" minOccurs="0" type="Quantity"/>
+		<xsd:element name="ComparisonPriceQuantity" minOccurs="0" type="DecimalValue"/>
+		<xsd:element name="GrossContent" minOccurs="0" type="Quantity"/>
+		<xsd:element name="HasTextilePartsWthAnimalOrigin" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+		<xsd:element name="BrandID" minOccurs="0" type="BrandID"/>
+		<xsd:element name="RetailArticleGeneral" minOccurs="0" type="ProductMDMRplctReqRetArtGen"/>
+		<xsd:element name="ProductRetailSeasons" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRpcltReqProdRetailSeasons"/>
+		<xsd:element name="ProductRetailHierarchy" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRpcltReqProdRetailHierarchy"/>
+		<xsd:element name="Description" minOccurs="0" maxOccurs="unbounded" type="ProductMDMReplicateRequestDescription"/>
+		<xsd:element name="GlobalTradeItemNumber" minOccurs="0" maxOccurs="unbounded" type="ProductMDMReplicateRequestGlobalTradeItemNo"/>
+		<xsd:element name="QuantityConversion" minOccurs="0" maxOccurs="unbounded" type="ProductMDMReplicateRequestQuantityConversion"/>
+		<xsd:element name="QuantityCharacteristic" minOccurs="0" maxOccurs="unbounded" type="ProductMDMReplicateRequestQuantityCharacteristic"/>
+		<xsd:element name="Classification" minOccurs="0" maxOccurs="unbounded" type="Classification"/>
+		<xsd:element name="VariantConfiguration" minOccurs="0" maxOccurs="unbounded" type="ProductVariantConfiguration"/>
+		<xsd:element name="TextCollection" minOccurs="0" type="ProductMDMReplicateRequestTextCollection"/>
+		<xsd:element name="StorageSpecification" minOccurs="0" type="ProductMDMRplctReqStorageSpec"/>
+		<xsd:element name="DistributionChainIndependentSalesSpecification" minOccurs="0" type="ProductMDMRplctReqDistrChnIndepSlsSpec"/>
+		<xsd:element name="PlantIndependentProcurementSpecification" minOccurs="0" type="ProductMDMRplctReqPlntIndepProcmtSpec"/>
+		<xsd:element name="ProductSCMAdvancedPlanning" minOccurs="0" type="ProductMDMSCMAdvPlan"/>
+		<xsd:element name="SalesSpecification" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqSlsSpec"/>
+		<xsd:element name="SalesSpecificTaxClassification" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqSlsSpcfcTxClass"/>
+		<xsd:element name="Plant" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqPlantSpec"/>
+		<xsd:element name="ValuationArea" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqValuationSpec"/>
+		<xsd:element name="Warehouse" minOccurs="0" maxOccurs="unbounded" type="ProductMDMReplicateRequestWarehouse"/>
+		<xsd:element name="SubscriptionProduct" minOccurs="0" type="SubscriptionData"/>
+		<xsd:element name="ProductBOM" minOccurs="0" maxOccurs="unbounded" type="ProductBOM"/>
+	</xsd:sequence>
+	<xsd:complexType name="ProductMDMRplctReqPlantSpec">
+		<xsd:sequence>
+			<xsd:element name="PlantID" type="NOSC_PlantID"/>
+			<xsd:element name="ProfileCode" minOccurs="0" type="ProductLogisticsProcessUsabilityProfileCode"/>
+			<xsd:element name="ProfileValidityStartDate" minOccurs="0" type="Date"/>
+			<xsd:element name="DeletedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="BatchManagementRequiredIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="SerialIdentifierAssignmentProfileCode" minOccurs="0" type="SerialIdentifierAssignmentProfileCode"/>
+			<xsd:element name="ProfitCenterID" minOccurs="0" type="ProfitCenterID"/>
+			<xsd:element name="GoodsIssueUnitCode" minOccurs="0" type="MeasureUnitCode"/>
+			<xsd:element name="NegativeStockAllowedIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="StockDeterminationGroupCode" minOccurs="0" type="StockDeterminationGroupCode"/>
+			<xsd:element name="ProductExciseTaxRelevanceIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="ConfigurableProductID" minOccurs="0" type="NOSC_ProductID"/>
+			<xsd:element name="ProductCFOPCategoryCode" minOccurs="0" type="ProductCFOPCategoryCode"/>
+			<xsd:element name="ProductCriticalPartIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="ProductLogisticsHandlingGroupCode" minOccurs="0" type="ProductLogisticsHandlingGroupCode"/>
+			<xsd:element name="ProductFreightGroupCode" minOccurs="0" type="ProductFreightGroupCode"/>
+			<xsd:element name="ProductDistributionProfileCode" minOccurs="0" type="ProductDistributionProfileCode"/>
+			<xsd:element name="OriginalBatchManagementRequiredIndicator" minOccurs="0" type="OPTIONAL_MDMIndicator"/>
+			<xsd:element name="OriginalBatchReferenceProductID" minOccurs="0" type="NOSC_ProductID"/>
+			<xsd:element name="Costing" minOccurs="0" type="ProductMDMRplctReqPlantCostingSpec"/>
+			<xsd:element name="SupplyPlanning" minOccurs="0" type="ProductMDMRplctReqPlantSupplyPlanningSpec"/>
+			<xsd:element name="MRPArea" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqPlantMRPAreaSpec"/>
+			<xsd:element name="Sales" minOccurs="0" type="ProductMDMRplctReqPlantSalesSpec"/>
+			<xsd:element name="QualityManagement" minOccurs="0" type="ProductMDMRplctReqPlantQMSpec"/>
+			<xsd:element name="PlantText" minOccurs="0" type="ProductMDMRplctReqPlantSpecTxt"/>
+			<xsd:element name="Forecasting" minOccurs="0" type="ProductMDMRplctReqPlantForecastSpec"/>
+			<xsd:element name="InternationalTrade" minOccurs="0" type="ProductMDMRplctReqPlantIntlTrade"/>
+			<xsd:element name="Storage" minOccurs="0" type="ProductMDMRplctReqPlantStorageSpec"/>
+			<xsd:element name="StorageLocation" minOccurs="0" maxOccurs="unbounded" type="ProductMDMRplctReqPlantStorageLocationSpec"/>
+			<xsd:element name="Purchasing" minOccurs="0" type="ProductMDMRplctReqPlantProcurementSpec"/>
+			<xsd:element name="WorkScheduling" minOccurs="0" type="ProductMDMRplctReqWorkSchedulingSpec"/>
+			<xsd:element name="PlantSCMAdvancedPlanning" minOccurs="0" type="ProductMDMPlantSCMAdvPlan"/>
+			<xsd:element name="Planning" minOccurs="0" type="ProductMDMRplctReqPlantPlanning"/>
+			<xsd:element name="ForecastParameters" minOccurs="0" type="ProductMDMRplctReqPlantForecastPar"/>
+			<xsd:element name="ProductionResourceTool" minOccurs="0" type="ProductMDMRplctReqPlantPRT"/>
+		</xsd:sequence>
+		<xsd:attribute name="actionCode" use="required" type="ActionCode"/>
+		<xsd:attribute name="storageLocationListCompleteTransmissionIndicator" type="OPTIONAL_MDMIndicator"/>
+		<xsd:attribute name="mrpAreaListCompleteTransmissionIndicator" type="OPTIONAL_MDMIndicator"/>
+	</xsd:complexType>
+	
+	
+	<xsd:complexType name="BusinessDocumentMessageHeader">
+				<xsd:sequence>
+					<xsd:element name="ID" minOccurs="0" type="BusinessDocumentMessageID"/>
+					<xsd:element name="UUID" minOccurs="0" type="UUID"/>
+					<xsd:element name="ReferenceID" minOccurs="0" type="BusinessDocumentMessageID"/>
+					<xsd:element name="ReferenceUUID" minOccurs="0" type="UUID"/>
+					<xsd:element name="CreationDateTime" type="GLOBAL_DateTime"/>
+					<xsd:element name="TestDataIndicator" minOccurs="0" type="Indicator"/>
+					<xsd:element name="ReconciliationIndicator" minOccurs="0" type="Indicator"/>
+					<xsd:element name="SenderBusinessSystemID" minOccurs="0" type="BusinessSystemID"/>
+					<xsd:element name="RecipientBusinessSystemID" minOccurs="0" type="BusinessSystemID"/>
+					<xsd:element name="SenderParty" minOccurs="0" type="BusinessDocumentMessageHeaderParty"/>
+					<xsd:element name="RecipientParty" minOccurs="0" maxOccurs="unbounded" type="BusinessDocumentMessageHeaderParty"/>
+					<xsd:element name="BusinessScope" minOccurs="0" maxOccurs="unbounded" type="BusinessScope"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			
+	<xsd:complexType name="ProductMDMBulkReplicateRequestMessage">
+				<xsd:sequence>
+					<xsd:element name="MessageHeader" type="BusinessDocumentMessageHeader"/>
+					<xsd:element name="ProductMDMReplicateRequestMessage" maxOccurs="unbounded" type="ProductMDMReplicateRequestMessage"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			
+	<xsd:complexType name="ProductMDMReplicateRequestMessage">
+				<xsd:sequence>
+					<xsd:element name="MessageHeader" type="BusinessDocumentMessageHeader"/>
+					<xsd:element name="Product" type="ProductMDMReplicateRequestProduct"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			
+	<xsd:schema targetNamespace="http://sap.com/xi/APPL/Global2" xmlns="http://sap.com/xi/APPL/Global2" xmlns:ccts="urn:un:unece:uncefact:documentation:standard:CoreComponentsTechnicalSpecification:3.0" xmlns:xi0="http://sap.com/xi/SAPGlobal20/Global" xmlns:xi1="http://sap.com/xi/EWM/Global">
+			<xsd:import namespace="http://sap.com/xi/EWM/Global"/>
+			
+			
+	Felder: PlantID, RecipientBusinessSystemID, SenderBusinessSystemID, ProductGroupInternalID, ProductInternalID, ProductTypeCode, DeletedIndicator

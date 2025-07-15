@@ -1,0 +1,309 @@
+Du sollst ein Skript für die Integration von eFiling of Employees Payments für UK erstellen. Es sollen Expense and Benefits importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Mapping:
+-----------
+- Mappe den eingehenden Payload gemäß den Mapping-Anforderungen des Request Mappings
+
+
+3. Message-Digest:
+------------------
+- Bilde den SHA1 Message Digest des Payloads und füge den Wert in den Payload ein
+- Element und Pfad für den Message Digest Wert:
+	- Element: "IRmark"
+	- Pfad: GovTalkMessage/Body/IRenvelope/IRheader/IRmark
+
+
+4. DataStore Write:
+-------------------
+- Schreibe nach Schritt 3 entstandenen Payload in folgenden DataStore:
+	- Name: "EXB20-21"
+	- EntryId: MessageID der Message
+
+
+5. Request "Set Results":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Message Digest
+
+Response Handling: 
+- kein Response Handling
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Message Digest Handling
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+
+SenderID -> GovTalkMessage/Header/SenderDetails/IDAuthentication/SenderID
+
+Value -> GovTalkMessage/Header/SenderDetails/IDAuthentication/Authentication/Value
+
+Product -> GovTalkMessage/GovTalkDetails/ChannelRouting/Channel/Product
+
+Timestamp -> GovTalkMessage/GovTalkDetails/ChannelRouting/Timestamp
+
+DefaultCurrency ->  GovTalkMessage/Body/IRenvelope/IRheader/DefaultCurrency
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+kein Response Mapping
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.govtalk.gov.uk/CM/envelope">
+  <SenderID>HMRC</SenderID>
+  <Value>abc123</Value>
+  <Product>TaxSystem</Product>
+  <Timestamp>2025-05-28T12:00:00Z</Timestamp>
+  <DefaultCurrency>GBP</DefaultCurrency>
+</Root>
+
+
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://www.govtalk.gov.uk/CM/envelope" 
+    xmlns="http://www.govtalk.gov.uk/CM/envelope"
+    elementFormDefault="qualified">
+
+  <xs:element name="Root">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SenderID" type="xs:string"/>
+        <xs:element name="Value" type="xs:string"/>
+        <xs:element name="Product" type="xs:string"/>
+        <xs:element name="Timestamp" type="xs:dateTime"/>
+        <xs:element name="DefaultCurrency" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<GovTalkMessage
+	xmlns="http://www.govtalk.gov.uk/CM/envelope">
+	<EnvelopeVersion/>
+	<Header>
+		<MessageDetails>
+			<Class/>
+			<Qualifier/>
+		</MessageDetails>
+		<SenderDetails>
+			<IDAuthentication>
+				<SenderID>HMRC</SenderID>
+				<Authentication>
+					<Method/>
+					<Value>abc123</Value>
+				</Authentication>
+			</IDAuthentication>
+		</SenderDetails>
+	</Header>
+	<GovTalkDetails>
+		<ChannelRouting>
+			<Channel>
+				<Product>TaxSystem</Product>
+			</Channel>
+			<Timestamp>2025-05-28T12:00:00Z</Timestamp>
+		</ChannelRouting>
+	</GovTalkDetails>
+	<Body>
+		<IRenvelope
+			xmlns="http://www.govtalk.gov.uk/taxation/EXB/20-21/1">
+			<IRheader>
+				<Keys>
+					<Key Type="TaxOfficeNumber"/>
+					<Key Type="TaxOfficeReference"/>
+				</Keys>
+				<PeriodEnd/>
+				<DefaultCurrency>GBP</DefaultCurrency>
+				<Sender/>
+			</IRheader>
+			<ExpensesAndBenefits/>
+		</IRenvelope>
+	</Body>
+</GovTalkMessage>
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.govtalk.gov.uk/CM/envelope"
+    xmlns="http://www.govtalk.gov.uk/CM/envelope"
+    elementFormDefault="qualified">
+  <xs:element name="GovTalkMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="EnvelopeVersion" type="xs:string"/>
+        <xs:element name="Header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MessageDetails">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Class" type="xs:string"/>
+                    <xs:element name="Qualifier" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="SenderDetails">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="IDAuthentication">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="SenderID" type="xs:string"/>
+                          <xs:element name="Authentication">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Method" type="xs:string"/>
+                                <xs:element name="Value" type="xs:string"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="GovTalkDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ChannelRouting">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Channel">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Product" type="xs:string"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Timestamp" type="xs:dateTime"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Body">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="IRenvelope" 
+                          type="IRenvelopeType"
+                          xmlns:q1="http://www.govtalk.gov.uk/taxation/EXB/20-21/1"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- Separate type definition for the IRenvelope from different namespace -->
+  <xs:complexType name="IRenvelopeType">
+    <xs:sequence>
+      <xs:element name="IRheader">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Keys">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Key" maxOccurs="2">
+                    <xs:complexType>
+                      <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                          <xs:attribute name="Type" type="xs:string" use="optional"/>
+                        </xs:extension>
+                      </xs:simpleContent>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="PeriodEnd" type="xs:string"/>
+            <xs:element name="DefaultCurrency" type="xs:string"/>
+            <xs:element name="Sender" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ExpensesAndBenefits" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

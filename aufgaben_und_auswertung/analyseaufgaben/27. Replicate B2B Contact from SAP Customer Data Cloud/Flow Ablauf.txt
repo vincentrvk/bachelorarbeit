@@ -1,0 +1,55 @@
+properties:
+- apiKeys
+Input: json
+
+splitter: /root/Events
+
+properties: 
+cdcEvent = /root/events/type/text()
+accType = /root/events/data/accountType/text()
+CDCAccountUid = /root/events[starts-with(type,'account')]/data/uid/text()
+
+JWT token bauen
+
+request fetch Details (GET)
+
+router: /root/isRegistered/text() = "true" -> weitermachen, wenn nicht dann exception
+
+router: boolean(/root/profile) = "true" -> weitermachen, wenn nicht dann exception
+
+aus Response:
+- bupaFirstName = normalize-space(lower-case(/root/profile/firstName/text()))
+- bupaLastName = normalize-space(lower-case(/root/profile/lastName/text()))
+- bupaEmail = lower-case(/root/profile/email/text())
+
+immer noch payload aus Response
+
+router: boolean(/root/profile/lastName) = "true" -> weitermachen, wenn nicht dann exception
+
+mapping
+
+request in Richtung SAP Customer Data Cloud
+
+
+mapping: 
+random UUID -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/MessageHeader/ID (für ID replace "-" mit "")
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/MessageHeader/UUID
+
+/root/profile/firstName -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/KeyWordsText
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/GivenName
+
+/root/profile/lastName -> 
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/AdditionalKeyWordsText
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/Person/Name/FamilyName
+
+/root/profile/email -> nix
+
+/root/emails/verified -> /ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email/URI
+Transformationsregel:
+- Wenn /root/emails/verified existiert, erstelle für jede email ein /ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email
+Tag und trage die Email in das Kind-Feld
+/ns1:BusinessPartnerSUITEBulkReplicateRequest/BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/AddressIndependentCommInfo/Email/URI
+ein

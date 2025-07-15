@@ -1,0 +1,50 @@
+#1:
+Produktnummer nicht erkannt
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script2__Script.groovy: 141: unable to resolve class Matcher
+@ line 141, column 19.
+final Matcher matcher = prodId =~ /(\d+)/
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhSdvkA9B1l2Y11QLmCOVgo_Brd
+
+
+#3:
+Nur Payload für Aktivierung hat gefehlt, ansonsten alles perfekt
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 146: The current scope already contains a variable of the name desc
+@ line 146, column 37.
+ICMProductName desc
+^
+
+script4__Script.groovy: 147: The current scope already contains a variable of the name prodType
+@ line 147, column 37.
+ICMProductType prodType
+^
+
+script4__Script.groovy: 148: The current scope already contains a variable of the name prodCode
+@ line 148, column 37.
+ICMProductCode prodCode
+^
+
+script4__Script.groovy: 151: The current scope already contains a variable of the name category
+@ line 151, column 37.
+DisplayValue category
+^
+
+script4__Script.groovy: 146: unable to resolve class I...
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.localName() is applicable for argument types: () values: []
+Possible solutions: localText(), collate(int), collate(int, int), collate(int, boolean), collate(int, int, boolean)@ line 239 in script5.groovy.
+The MPL ID for the failed message is : AGhSeTDAOD1LS3Yt7Ir-zuykuvqN
+

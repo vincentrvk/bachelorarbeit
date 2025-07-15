@@ -1,0 +1,493 @@
+Du sollst ein Skript für die Integration von S4/HANA mit ICI (Buy Side). Es sollen Produkt Masterdaten in ICI importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+RecipientBusinessSystemID_config = Icertis_BUY
+RecipientBusinessSystemID_payload = //RecipientBusinessSystemID
+SenderBusinessSystemID = //SenderBusinessSystemID
+
+Für jedes Produkt einzeln:
+ProductGroupInternalID = //ProductGroupInternalID
+ProductInternalID = //ProductInternalID
+PlantID = //PlantID
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Eingehenden Payload speichern:
+-------------------------------
+- Speichere den eingehenden Payload für die spätere Verarbeitung
+
+
+3. Splitter für Produkte
+------------------------
+- Filtere den Payload für das "Product"-Tag und verarbeite jedes Produkt einzeln
+
+
+4. Filter ProductInternalID:
+----------------------------
+- Validiere die Produkte gemäß den Validierungsregeln
+
+
+5. Request "Check if Product exists":
+-----------------
+Adresse: ${property.requestURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keine
+Query: ${property.ProductInternalID}
+Body: keiner
+
+Response Handling: 
+- Wenn der eingehende Body kein PRODUCT-Objekt enthält, existiert das Produkt nicht -> CREATE
+- Wenn der eingehende Body ein PRODUCT-Objekt enthält, existiert das Produkt -> UPDATE
+- Entscheide hiernach welchen der folgenden beiden Requests benutzt wird (Schritte 6a oder 6b)
+
+
+6a. Request "UPDATE Product":
+-----------------
+Adresse: ${property.requestURL}/Update
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Product
+
+Response Handling: 
+- kein Response Handling
+
+
+6b. Request "CREATE Product":
+-----------------
+Adresse: ${property.requestURL}/Create
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Product
+
+Response Handling: 
+- kein Response Handling
+
+
+7. Request "Set Active Status":
+-----------------
+Adresse: ${property.requestURL}/${property.ProductInternalID}/Activate
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Product
+
+Response Handling: 
+- kein Response Handling
+
+
+8. Splitter für Werke
+------------------------
+- Vom eingehenden Payload ausgehend
+- Filtere den Payload für das "Plant"-Tag und verarbeite jedes Werk einzeln
+
+
+9. Request "Check if Plant exists":
+-----------------
+Adresse: ${property.requestURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keine
+Query: ${property.PlantID}
+Body: keiner
+
+Response Handling: 
+- Wenn der eingehende Body kein PLANT-Objekt enthält, existiert das Werk nicht -> CREATE
+- Wenn der eingehende Body ein PLANT-Objekt enthält, existiert das Werk -> UPDATE
+- Entscheide hiernach welchen der folgenden beiden Requests benutzt wird (Schritte 10a oder 10b)
+
+
+10a. Request "UPDATE Plant":
+-----------------
+Adresse: ${property.requestURL}/UpdatePlant
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Plant
+
+Response Handling: 
+- kein Response Handling
+
+
+10b. Request "CREATE Plant":
+-----------------
+Adresse: ${property.requestURL}/CreatePlant
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Plant
+
+Response Handling: 
+- kein Response Handling
+
+
+11. Logging:
+------------
+- Logge den Payload in folgenden Fällen als Attachment String
+	- vor jeder Request
+	- nach jeder Request
+	- nach jedem Mapping
+	- vor jedem Mapping
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+- Es werden nur Produkte mit Produktnummer höher als 999 verarbeitet (z.B. PROD1500, PROD1000)
+- Ist kein Produkt mit Produktnummer höher als 999 vorhanden, wirf einen Fehler
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING (Products): 
+Quellfeld -> Zielfeld
+XML -> JSON
+
+ProductInternalID -> Data.ICMProductCode
+
+ProductTypeCode -> Data.ICMProductTypeExternalID.DisplayValue
+
+${property.SenderBusinessSystemID} -> Data.ICMExternalSourceSystem
+
+ProductGroupInternalID -> Data.ICMProductGroupCode.DisplayValue
+
+DeletedIndicator -> Data.isActive
+Transformationsregel:
+- Negiere den eingehenden Boolean (z.B. "true" -> "false")
+- Case insensitive
+
+
+REQUEST-MAPPING (Plant): 
+Quellfeld -> Zielfeld
+XML -> JSON
+
+PlantID -> Data.ICMPlantID.DisplayValue
+
+${property.ProductInternalID} -> Data.ICMExternalId.DisplayValue
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+keins
+
+
+---
+Input:
+FLOW INPUT:
+<?xml version="1.0" encoding="UTF-8"?>
+<ProductMDMBulkReplicateRequestMessage xmlns="http://sap.com/xi/APPL/Global2">
+  <MessageHeader>
+    <CreationDateTime>2025-05-28T12:00:00Z</CreationDateTime>
+    <SenderBusinessSystemID>SYS_EXT_01</SenderBusinessSystemID>
+    <RecipientBusinessSystemID>SYS_RECEIVER_002</RecipientBusinessSystemID>
+  </MessageHeader>
+  <ProductMDMReplicateRequestMessage>
+    <MessageHeader>
+      <CreationDateTime>2025-05-28T12:00:00Z</CreationDateTime>
+    </MessageHeader>
+    <Product>
+      <ProductInternalID>PROD12345</ProductInternalID>
+      <ProductTypeCode>FG</ProductTypeCode>
+      <DeletedIndicator>false</DeletedIndicator>
+      <ProductGroupInternalID>GRP789</ProductGroupInternalID>
+      <Plant actionCode="01">
+        <PlantID>PLANT001</PlantID>
+      </Plant>
+	  <Plant actionCode="01">
+        <PlantID>PLANT002</PlantID>
+      </Plant>
+    </Product>
+	<Product>
+      <ProductInternalID>PROD23456</ProductInternalID>
+      <ProductTypeCode>FG</ProductTypeCode>
+      <DeletedIndicator>false</DeletedIndicator>
+      <ProductGroupInternalID>GRP789</ProductGroupInternalID>
+      <Plant actionCode="01">
+        <PlantID>PLANT001</PlantID>
+      </Plant>
+	  <Plant actionCode="01">
+        <PlantID>PLANT002</PlantID>
+      </Plant>
+    </Product>
+  </ProductMDMReplicateRequestMessage>
+</ProductMDMBulkReplicateRequestMessage>
+
+
+INPUT REQUEST MAPPING (Products):
+<Product>
+	<ProductInternalID>PROD12345</ProductInternalID>
+	<ProductTypeCode>FG</ProductTypeCode>
+	<DeletedIndicator>true</DeletedIndicator>
+	<ProductGroupInternalID>GRP789</ProductGroupInternalID>
+	<Plant actionCode="01">
+		<PlantID>PLANT001</PlantID>
+	</Plant>
+</Product>
+
+
+INPUT REQUEST MAPPING (Plant):
+<Plant actionCode="01">
+	<PlantID>PLANT001</PlantID>
+</Plant>
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+FLOW INPUT SCHEMA:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sap.com/xi/APPL/Global2"
+           xmlns="http://sap.com/xi/APPL/Global2"
+           elementFormDefault="qualified">
+  <xs:element name="ProductMDMBulkReplicateRequestMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MessageHeader" type="BusinessDocumentMessageHeader"/>
+        <xs:element name="ProductMDMReplicateRequestMessage" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MessageHeader" type="BusinessDocumentMessageHeader"/>
+              <xs:element name="Product" type="ProductMDMReplicateRequestProduct" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="BusinessDocumentMessageHeader">
+    <xs:sequence>
+      <xs:element name="CreationDateTime" type="xs:dateTime"/>
+      <xs:element name="SenderBusinessSystemID" type="xs:string" minOccurs="0"/>
+      <xs:element name="RecipientBusinessSystemID" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ProductMDMReplicateRequestProduct">
+    <xs:sequence>
+      <xs:element name="ProductInternalID" type="xs:string" minOccurs="0"/>
+      <xs:element name="ProductTypeCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="DeletedIndicator" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="ProductGroupInternalID" type="xs:string" minOccurs="0"/>
+      <xs:element name="Plant" type="PlantSpec" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PlantSpec">
+    <xs:sequence>
+      <xs:element name="PlantID" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="actionCode" type="xs:string" use="required"/>
+  </xs:complexType>
+</xs:schema>
+
+
+INPUT SCHEMA REQUEST MAPPING (Products):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.com/product"
+           xmlns="http://example.com/product"
+           elementFormDefault="qualified">
+  <xs:element name="Product">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ProductInternalID" type="xs:string"/>
+        <xs:element name="ProductTypeCode" type="xs:string"/>
+        <xs:element name="DeletedIndicator" type="xs:boolean"/>
+        <xs:element name="ProductGroupInternalID" type="xs:string"/>
+        <xs:element name="Plant" type="PlantSpec"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- Shared type used in both XSDs -->
+  <xs:complexType name="PlantSpec">
+    <xs:sequence>
+      <xs:element name="PlantID" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="actionCode" type="xs:string" use="required"/>
+  </xs:complexType>
+
+</xs:schema>
+
+
+INPUT SCHEMA REQUEST MAPPING (Plant):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.com/plant"
+           xmlns="http://example.com/plant"
+           elementFormDefault="qualified">
+  <xs:element name="Plant">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="PlantID" type="xs:string"/>
+      </xs:sequence>
+      <xs:attribute name="actionCode" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING (Products):
+{
+    "Data": {
+        "ICMProductCode": "PROD12345",
+        "ICMProductTypeExternalID": {
+            "DisplayValue": "FinishedGood"
+        },
+        "ICMProductGroupCode": {
+            "DisplayValue": "GRP789"
+        },
+        "ICMExternalSourceSystem": "SYS_EXT_01",
+        "isActive": "true"
+    }
+}
+
+
+
+OUTPUT REQUEST MAPPING (Plant):
+{
+    "Data": {
+        "ICMPlantID": {
+            "DisplayValue": "PLANT001"
+        },
+        "ICMExternalId": {
+            "DisplayValue": "PROD12345"
+        }
+    }
+}
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING (Products):
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProductData",
+  "type": "object",
+  "properties": {
+    "Data": {
+      "type": "object",
+      "properties": {
+        "ICMProductCode": {
+          "type": "string"
+        },
+        "ICMProductTypeExternalID": {
+          "type": "object",
+          "properties": {
+            "DisplayValue": {
+              "type": "string"
+            }
+          },
+          "required": ["DisplayValue"]
+        },
+        "ICMProductGroupCode": {
+          "type": "object",
+          "properties": {
+            "DisplayValue": {
+              "type": "string"
+            }
+          },
+          "required": ["DisplayValue"]
+        },
+        "ICMExternalSourceSystem": {
+          "type": "string"
+        },
+        "isActive": {
+          "type": "string",
+          "enum": ["true", "false"]
+        }
+      },
+      "required": [
+        "ICMProductCode",
+        "ICMProductTypeExternalID",
+        "ICMProductGroupCode",
+        "ICMExternalSourceSystem",
+        "isActive"
+      ]
+    }
+  },
+  "required": ["Data"]
+}
+
+
+
+
+OUTPUT SCHEMA REQUEST MAPPING (Plant):
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PlantData",
+  "type": "object",
+  "properties": {
+    "Data": {
+      "type": "object",
+      "properties": {
+        "ICMPlantID": {
+          "type": "object",
+          "properties": {
+            "DisplayValue": {
+              "type": "string"
+            }
+          },
+          "required": ["DisplayValue"]
+        },
+        "ICMExternalId": {
+          "type": "object",
+          "properties": {
+            "DisplayValue": {
+              "type": "string"
+            }
+          },
+          "required": ["DisplayValue"]
+        }
+      },
+      "required": ["ICMPlantID", "ICMExternalId"]
+    }
+  },
+  "required": ["Data"]
+}
+
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

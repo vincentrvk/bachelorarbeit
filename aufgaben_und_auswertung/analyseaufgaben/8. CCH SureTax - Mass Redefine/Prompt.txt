@@ -1,0 +1,379 @@
+Du sollst ein Skript für die Integration von S/4HANA Cloud und CCH Sure Tax bauen. In dieser Integration soll ein Geocode Batch geholt werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+sureTaxUsername = 
+sureTaxPassword = 
+sureTaxURL = 
+exchangejcdunifyind = /n0:TAX_JUR_REDEFINE_SEND/LOCATION_SIMPLE/JCD_UNIFY_IND/text()
+stateMap = [ "00":"US",
+     "01":"AL",
+     "02":"AK",
+     "03":"AL",
+     "04":"AZ",
+     "05":"AR",
+     "06":"CA" ]
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Request "Mass Redefine":
+-----------------
+Adresse: ${property.sureTaxURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping
+
+Response Handling: 
+- Die Antwort muss gemäß den Regeln des Response-Mappings behandelt werden
+
+3. Logging:
+----------------------
+- Folgende Schritte müssen geloggt und als Message-Attachment (als String) angehangen werden:
+	1. Eingehender Payload
+	2. Nach dem Request-Mapping 
+	3. Response Payload
+	4. Nach dem Response-Mapping
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+Validierungsregeln:
+- COUNTRY ist required
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfeld -> Zielfeld
+
+${property.sureTaxUsername} -> /ns3:BatchGetGeocode/ns3:request/ns3:BatchGetGeocode/ns3:ClientNumber
+
+current Date -> /ns3:BatchGetGeocode/ns3:request/ns3:BatchGetGeocode/ns3:DataYear
+Transformationsregel:
+- nur im Format "yyyy"
+
+SEQUENCE_NUM -> /ns3:BatchGetGeocode/ns3:request/ns3:BatchGetGeocode/ns3:LocationList/ns3:Location/ns3:SequenceNum
+Transformationsregel:
+- Whitespaces trimmen
+
+ZIPCODE, COUNTRY -> /ns3:BatchGetGeocode/ns3:request/ns3:BatchGetGeocode/ns3:LocationList/ns3:Location/ns3:Zipcode
+Transformationsregel:
+- Wenn COUNTRY = "US" oder "USA" (case insensitive), dann gib als Zielwert ZIPCODE zurück
+- Wenn COUNTRY etwas anderes beinhaltet, tokenize ("-") und trim es und gib den ersten Wert dieser Operationen als Zielwert zurück
+
+STREET -> /ns3:BatchGetGeocode/ns3:request/ns3:BatchGetGeocode/ns3:LocationList/ns3:Location/ns3:AddressLine1
+Transformationsregel:
+- Whitespaces trimmen
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+
+ns0:Geocode, ${property.exchangejcdunifyind} -> /ns2:TAX_JUR_REDEFINE_RECEIVE/TAX_JURI_CODE_NUM/TXJCD
+- Wenn ${property.exchangejcdunifyind} = "X" und die ersten 2 Zeichen aus ns0:Geocode "ZZ" sind, schreibe den Zielwert als "US"+ns0:Geocode
+- Wenn ${property.exchangejcdunifyind} = "X" und die ersten 2 Zeichen aus ns0:Geocode "US" sind,
+	- mappe Zeichen 3 bis 4 auf die stateMap
+	- schreibe die gemappten Zeichen zwischen Zeichen 2 und 3 von ns0:Geocode und schreibe ein "-" ans Ende des Strings
+	
+ns0:SequenceNum -> /ns2:TAX_JUR_REDEFINE_RECEIVE/TAX_JURI_CODE_NUM/SEQUENCE_NUM
+
+ns0:ResponseCode -> /ns2:TAX_JUR_REDEFINE_RECEIVE/TAX_JURI_CODE_NUM/MSG_RETURN/RETCODE
+Transformationsregel:
+- Wenn ns0:ResponseCode = "9999" ist, gib "0" als Zielwert aus
+- Wenn ns0:ResponseCode etwas anderes ist, gib "1" als Zielwert aus
+
+ns0:ResponseCode -> /ns2:TAX_JUR_REDEFINE_RECEIVE/TAX_JURI_CODE_NUM/MSG_RETURN/ERRCODE
+Transformationsregel:
+- Wenn ns0:ResponseCode = "9999" ist, gib "0000" als Zielwert aus
+- Wenn ns0:ResponseCode etwas anderes ist, gib "1999" als Zielwert aus
+
+ns0:ErrorMessage -> /ns2:TAX_JUR_REDEFINE_RECEIVE/TAX_JURI_CODE_NUM/MSG_RETURN/ERRMSG
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<TAX_JUR_REDEFINE_SEND xmlns="http://sap.com/xi/FotETaxUS">
+  <LOCATION_SIMPLE>
+    <SEQUENCE_NUM>12345</SEQUENCE_NUM>
+    <ZIPCODE>90210</ZIPCODE>
+    <COUNTRY>USA</COUNTRY>
+    <STREET_ADDRESS_SIMPLE>
+      <STREET>Main Street 1</STREET>
+    </STREET_ADDRESS_SIMPLE>
+  </LOCATION_SIMPLE>
+</TAX_JUR_REDEFINE_SEND>
+
+
+
+
+INPUT RESPONSE MAPPING:
+<ns0:BatchGetGeocodeResponse xmlns:ns0="http://soa.noventic.com/GeocodeService/GeocodeService-V1">
+  <ns0:BatchGetGeocodeResult>
+    <ns0:GeocodeResponseList>
+      <ns0:GeocodeResponse>
+        <ns0:Geocode>123456789</ns0:Geocode>
+        <ns0:SequenceNum>1</ns0:SequenceNum>
+        <ns0:ResponseCode>0</ns0:ResponseCode>
+        <ns0:ErrorMessage></ns0:ErrorMessage>
+      </ns0:GeocodeResponse>
+      <ns0:GeocodeResponse>
+        <ns0:Geocode>987654321</ns0:Geocode>
+        <ns0:SequenceNum>2</ns0:SequenceNum>
+        <ns0:ResponseCode>100</ns0:ResponseCode>
+        <ns0:ErrorMessage>Invalid ZIP code</ns0:ErrorMessage>
+      </ns0:GeocodeResponse>
+    </ns0:GeocodeResponseList>
+  </ns0:BatchGetGeocodeResult>
+</ns0:BatchGetGeocodeResponse>
+
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sap.com/xi/FotETaxUS"
+           xmlns="http://sap.com/xi/FotETaxUS"
+           elementFormDefault="qualified">
+  <xs:element name="TAX_JUR_REDEFINE_SEND" type="TAX_JUR_REDEFINE_SEND"/>
+  <xs:complexType name="TAX_JUR_REDEFINE_SEND">
+    <xs:sequence>
+      <xs:element name="LOCATION_SIMPLE" maxOccurs="unbounded" type="LOCATION_SIMPLE"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LOCATION_SIMPLE">
+    <xs:sequence>
+      <xs:element name="SEQUENCE_NUM">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ZIPCODE" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="COUNTRY" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="3"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="STREET_ADDRESS_SIMPLE" minOccurs="0" type="STREET_ADDRESS_SIMPLE"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="STREET_ADDRESS_SIMPLE">
+    <xs:sequence>
+      <xs:element name="STREET" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="60"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://soa.noventic.com/GeocodeService/GeocodeService-V1"
+           xmlns:ns0="http://soa.noventic.com/GeocodeService/GeocodeService-V1"
+           elementFormDefault="qualified">
+  <xs:element name="BatchGetGeocodeResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BatchGetGeocodeResult">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GeocodeResponseList">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="GeocodeResponse" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Geocode" type="xs:string" minOccurs="0"/>
+                          <xs:element name="SequenceNum" type="xs:int" minOccurs="0"/>
+                          <xs:element name="ResponseCode" type="xs:string" minOccurs="0"/>
+                          <xs:element name="ErrorMessage" type="xs:string" minOccurs="0"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<ns3:BatchGetGeocode xmlns:ns3="http://soa.noventic.com/GeocodeService/GeocodeService-V1">
+  <ns3:request>
+    <ns3:ClientNumber>123456</ns3:ClientNumber>
+    <ns3:DataYear>2025</ns3:DataYear>
+    <ns3:LocationList>
+      <ns3:Location>
+        <ns3:SequenceNum>1</ns3:SequenceNum>
+        <ns3:Zipcode>12345</ns3:Zipcode>
+        <ns3:AddressLine1>123 Main St</ns3:AddressLine1>
+      </ns3:Location>
+      <ns3:Location>
+        <ns3:SequenceNum>2</ns3:SequenceNum>
+        <ns3:Zipcode>67890</ns3:Zipcode>
+        <ns3:AddressLine1>456 Elm St</ns3:AddressLine1>
+      </ns3:Location>
+    </ns3:LocationList>
+  </ns3:request>
+</ns3:BatchGetGeocode>
+
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+<ns2:TAX_JUR_REDEFINE_RECEIVE xmlns:ns2="http://sap.com/xi/FotETaxUS">
+  <ns2:TAX_JURI_CODE_NUM>
+    <ns2:TXJCD>TXJCD_001</ns2:TXJCD>
+    <ns2:SEQUENCE_NUM>1234567890</ns2:SEQUENCE_NUM>
+    <ns2:MSG_RETURN>
+      <ns2:RETCODE>0</ns2:RETCODE>
+      <ns2:ERRCODE>0001</ns2:ERRCODE>
+      <ns2:ERRMSG>No error occurred</ns2:ERRMSG>
+    </ns2:MSG_RETURN>
+  </ns2:TAX_JURI_CODE_NUM>
+  <ns2:TAX_JURI_CODE_NUM>
+    <ns2:TXJCD>TXJCD_002</ns2:TXJCD>
+    <ns2:SEQUENCE_NUM>9876543210</ns2:SEQUENCE_NUM>
+    <ns2:MSG_RETURN>
+      <ns2:RETCODE>1</ns2:RETCODE>
+      <ns2:ERRCODE>1999</ns2:ERRCODE>
+      <ns2:ERRMSG>Invalid jurisdiction code</ns2:ERRMSG>
+    </ns2:MSG_RETURN>
+  </ns2:TAX_JURI_CODE_NUM>
+</ns2:TAX_JUR_REDEFINE_RECEIVE>
+
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns3="http://soa.noventic.com/GeocodeService/GeocodeService-V1" targetNamespace="http://soa.noventic.com/GeocodeService/GeocodeService-V1" elementFormDefault="qualified">
+  <xs:element name="BatchGetGeocode" type="ns3:BatchGetGeocodeEnvelope"/>
+  <xs:complexType name="BatchGetGeocodeEnvelope">
+    <xs:sequence>
+      <xs:element name="request" type="ns3:BatchGetGeocodeType"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BatchGetGeocodeType">
+    <xs:sequence>
+      <xs:element name="ClientNumber" type="xs:string"/>
+      <xs:element name="DataYear" type="xs:int"/>
+      <xs:element name="LocationList" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Location" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="SequenceNum" type="xs:int" minOccurs="0"/>
+                  <xs:element name="Zipcode" type="xs:string" minOccurs="0"/>
+                  <xs:element name="AddressLine1" type="xs:string" minOccurs="0"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sap.com/xi/FotETaxUS"
+           xmlns="http://sap.com/xi/FotETaxUS"
+           elementFormDefault="qualified">
+
+  <xs:element name="TAX_JUR_REDEFINE_RECEIVE" type="TAX_JUR_REDEFINE_RECEIVE"/>
+
+  <xs:complexType name="TAX_JUR_REDEFINE_RECEIVE">
+    <xs:sequence>
+      <xs:element name="TAX_JURI_CODE_NUM" maxOccurs="unbounded" type="TAX_JURI_CODE_NUM"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TAX_JURI_CODE_NUM">
+    <xs:sequence>
+      <xs:element name="TXJCD" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="15"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="SEQUENCE_NUM">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="MSG_RETURN" minOccurs="0" type="LOCATION_HEADER"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LOCATION_HEADER">
+    <xs:sequence>
+      <xs:element name="RETCODE" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:length value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ERRCODE" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="4"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ERRMSG" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="72"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

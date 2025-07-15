@@ -1,0 +1,32 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: java.lang.String.call() is applicable for argument types: (java.lang.String) values: [12345]
+Possible solutions: wait(), any(), wait(long), split(java.lang.String), take(int), each(groovy.lang.Closure)@ line 225 in script1.groovy.
+The MPL ID for the failed message is : AGhSvuxNVPMZhjXfLlCTBne8K0DL
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script2__Script.groovy: 111: illegal colon after argument expression;
+solution: a complex label expression before a colon must be parenthesized @ line 111, column 24.
+mb.Quotes(xmlns:xsi:'http://www.w3.org/2001/XMLSchema-instance') {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhSwE1i2dCjxS0tyEdDmq9tdoxO
+
+
+#3:
+Quote Entry Request verursacht 500 HTTP Status beim Mock Flow (unbekannter Grund)…
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Quote-Import-Skript: Server returned HTTP response code: 500 for URL: https://ds-cpi.it-cpi005-rt.cfapps.eu20.hana.ondemand.com/http/vkr/sapcpq_mock@ line 192 in script3.groovy.
+The MPL ID for the failed message is : AGhSwZQJukCek_ahQ59-1yWa5dCL
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: java.lang.String.call() is applicable for argument types: (java.lang.String) values: [NR12345]
+Possible solutions: wait(), any(), wait(long), split(java.lang.String), take(int), each(groovy.lang.Closure)@ line 235 in script4.groovy.
+The MPL ID for the failed message is : AGhSwt0q2xi311S7ldFzXI_ySdB5
+
+
+#5:
+Transformation des Feldes quantity ist nicht korrekt, ansonsten alles richtig (hier hat einfach ein -1 gefehlt)

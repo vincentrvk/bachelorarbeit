@@ -1,0 +1,142 @@
+Input:
+<BusinessPartnerSUITEReplicateRequestMessage xmlns="http://sap.com/xi/SAPGlobal20/Global">
+  <BusinessPartner>
+    <InternalID>BP100001</InternalID>
+    <Common>
+      <IAMID>IAM123456</IAMID>
+    </Common>
+    <Name>
+      <FirstName>Max</FirstName>
+      <LastName>Mustermann</LastName>
+    </Name>
+    <Address>
+      <CityName>Jena</CityName>
+    </Address>
+  </BusinessPartner>
+</BusinessPartnerSUITEReplicateRequestMessage>
+
+Input Schema:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sap.com/xi/SAPGlobal20/Global"
+           xmlns="http://sap.com/xi/SAPGlobal20/Global"
+           elementFormDefault="qualified">
+  <xs:element name="BusinessPartnerSUITEReplicateRequestMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BusinessPartner">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="InternalID" type="xs:string"/>
+              <xs:element name="Common" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="IAMID" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Name" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FirstName" type="xs:string"/>
+                    <xs:element name="LastName" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Address" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CityName" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+Response Output:
+{
+  "header": {
+    "messageId": "MSG-20250603-001",
+    "timestamp": "2025-06-03T10:30:00Z",
+    "sourceSystem": "CRM-System",
+    "targetSystem": "BusinessPartnerService"
+  },
+  "profile": {
+    "firstName": "Max",
+    "lastName": "Mustermann",
+    "city": "Berlin",
+    "email": "max.mustermann@example.com",
+    "username": "m.mustermann"
+  }
+}
+
+
+Response Schema
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BusinessPartnerPayload",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["messageId", "timestamp", "sourceSystem", "targetSystem"]
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": ["firstName", "lastName", "city", "email", "username"]
+    }
+  },
+  "required": ["header", "profile"]
+}
+
+
+
+
+Request: 
+
+jwtHeader= base64encoded({"alg":"RS256","typ":"JWT","kid":"${apiKey}"}) 
+jwtClaim=base64encoded({aktuellerUnixTimestamp in Sekunden})
+jwt-token = "jwtHeader.jwtClaim"
+Header: "Authorization": "Bearer {jwt-token}.{signature}"
+Body: UID (//BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner/Common/IAMID/text() vom Input)
+
+body_str = "apiKey=" + URLEncoder.encode(map.get("apiKey"), "UTF-8");
+body_str += "&UID=" + URLEncoder.encode(map.get("CDCAccountUid").replace("-",""), "UTF-8");
+body_str += "&profile=" + URLEncoder.encode(message.getBody(java.lang.String), "UTF-8");
+
+
+
+
+

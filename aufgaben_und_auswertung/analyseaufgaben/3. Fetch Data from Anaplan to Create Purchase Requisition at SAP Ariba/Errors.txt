@@ -1,0 +1,10 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 88: end of line reached within a simple string 'x' or "x" or /x/;
+solution: for multi-line literals, use triple quotes '''x''' or """x""" or /x/ or $/x/$ @ line 88, column 91.
+wd}")
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhJkl2FI0ULUtwDIvfH1CfrdOZY

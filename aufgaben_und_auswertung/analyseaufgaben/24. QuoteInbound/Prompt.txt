@@ -1,0 +1,356 @@
+Du sollst ein Skript für die Integration von SAP Commerce Cloud Integration und SAP CPQ erstellen. Es soll Quotes zu SAP Commerce Cloud importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Decoding:
+-----------
+- Dekodiere von Base64 (wenn vorhanden) den eingehenden Payload unter //Quote/SubmitQuoteCover/Content und Logge den Inhalt als Attachment als String
+- Speichere den Base64 kodierten Inhalt ebenfalls unter der Property "encodedDocument"
+- Wenn nicht vorhanden, Schritt überspringen
+
+
+3. Request "Send Quotes":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request Mapping (Quote)
+
+Response Handling: 
+- kein Response Handling
+
+
+4. Request "Send Quote Entries":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Jeder Quote Entry Payload einzeln nach Request Mapping (Quote Entry)
+
+Response Handling: 
+- kein Response Handling
+
+
+5. Logging:
+------------
+- Logge den Payload als Attachment als String in folgenden Fällen:
+	- vor jeder Request
+	- nach jeder Request
+	- vor jedem Mapping
+	- nach jedem Mapping
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING (Quote): 
+Quellfeld -> Zielfeld
+
+/Quote/CompositeNumber, /Quote/QuoteExternalId -> /Quotes/Quote/externalQuoteId
+Transformationsregel:
+- Wenn CompositeNumber und QuoteExternalId (beide getrimmt) gleich sind, nimm einen leeren String als Zielwert
+- Wenn nicht, nutze CompositeNumber als Zielwert
+
+${property.encodedDocument} -> /Quotes/Quote/externalQuoteDocument
+
+/Quote/CompositeNumber, /Quote/QuoteExternalId -> /Quotes/Quote/code
+Transformationsregel:
+- Wenn QuoteExternalId leer ist, nutze CompositeNumber als Zielwert
+- Wenn nicht, dann nimm QuoteExternalId als Zielwert
+
+/Quote/BillToCustomer/Email -> /Quotes/Quote/user/User/uid
+
+/Quote/SalesArea/SalesOrganization -> /Quotes/Quote/salesOrganization
+
+
+REQUEST-MAPPING (Quote Entry): 
+Quellfeld -> Zielfeld
+
+/Quote/CompositeNumber, /Quote/QuoteExternalId -> /QuoteEntries/QuoteEntry/order/Quote/code
+Transformationsregel:
+- Wenn QuoteExternalId befüllt ist, trimme und nimm es als Zielwert
+- Wenn es nicht befüllt ist, nimm CompositeNumber als Zielwert
+
+/Quote/Items/Item/Rank -> /QuoteEntries/QuoteEntry/rank
+Transformationsregel:
+- Runde auf eine Integer Zahl auf und subtrahiere 1 
+- Nimm das Ergebnis als Zielwert
+
+/Quote/Items/Item/RolledUpDiscountAmount/DecimalValue -> /QuoteEntries/QuoteEntry/entryDiscount
+
+/Quote/Items/Item/ListPrice/DecimalValue -> /QuoteEntries/QuoteEntry/basePrice
+
+/Quote/Items/Item/Quantity -> /QuoteEntries/QuoteEntry/quantity	
+Transformationsregel:
+- Runde auf eine Integer Zahl auf und subtrahiere 1 
+- Nimm das Ergebnis als Zielwert
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+kein Response Mapping
+
+
+---
+Input:
+INPUT REQUEST MAPPING (beide):
+<?xml version="1.0" encoding="UTF-8"?>
+<Quote xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CompositeNumber>12345</CompositeNumber>
+  <QuoteExternalId>Q-2025-0001</QuoteExternalId>
+  <BillToCustomer>
+    <Email>customer@example.com</Email>
+  </BillToCustomer>
+  <SalesArea>
+    <SalesOrganization>DE01</SalesOrganization>
+  </SalesArea>
+  <Items>
+    <Item>
+      <Rank>1</Rank>
+      <RolledUpDiscountAmount>
+        <DecimalValue>50.00</DecimalValue>
+      </RolledUpDiscountAmount>
+      <ListPrice>
+        <DecimalValue>500.00</DecimalValue>
+      </ListPrice>
+      <Quantity>9</Quantity>
+    </Item>
+  </Items>
+  <SubmitQuoteCover>
+    <Content>Base64-String-placeholder</Content>
+  </SubmitQuoteCover>
+</Quote>
+
+
+
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:element name="Quote">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CompositeNumber" type="xs:int"/>
+        <xs:element name="QuoteExternalId" type="xs:string"/>
+        <xs:element name="BillToCustomer">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Email" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SalesArea">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SalesOrganization" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Items">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Item" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Rank" type="xs:byte"/>
+                    <xs:element name="RolledUpDiscountAmount">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="DecimalValue" type="xs:float"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="ListPrice">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="DecimalValue" type="xs:float"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Quantity" type="xs:float"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SubmitQuoteCover">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Content" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING (Quote):
+<?xml version="1.0" encoding="UTF-8"?>
+<Quotes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Quote>
+    <externalQuoteId>12345</externalQuoteId>
+    <externalQuoteDocument>base64-string-placeholder</externalQuoteDocument>
+    <code>Q-2025-0001</code>
+    <user>
+      <User>
+        <uid>jdoe@example.com</uid>
+      </User>
+    </user>
+    <salesOrganization>DE01</salesOrganization>
+  </Quote>
+</Quotes>
+
+
+
+OUTPUT REQUEST MAPPING (Quote Entry):
+<?xml version="1.0" encoding="UTF-8"?>
+<QuoteEntries>
+  <QuoteEntry>
+    <order>
+      <Quote>
+        <code>Q-2025-0001</code> 
+      </Quote>
+    </order>
+    <rank>0</rank> 
+    <entryDiscount>50.00</entryDiscount>
+    <basePrice>500.00</basePrice>
+    <quantity>9</quantity> 
+  </QuoteEntry>
+</QuoteEntries>
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING (Quote):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:element name="Quotes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Quote" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="externalQuoteId" type="xs:string"/>
+              <xs:element name="externalQuoteDocument" type="xs:string"/>
+              <xs:element name="code" type="xs:string"/>
+              <xs:element name="user">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="User">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="uid" type="xs:string"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="salesOrganization" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+OUTPUT SCHEMA REQUEST MAPPING (Quote Entry):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="QuoteEntries">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="QuoteEntry" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="rank" type="xs:string" minOccurs="0"/>
+              <xs:element name="entryDiscount" type="xs:double" minOccurs="0"/>
+              <xs:element name="basePrice" type="xs:double" minOccurs="0"/>
+              <xs:element name="quantity" type="xs:long"/>
+              <xs:element name="order" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Quote" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="code" type="xs:string" minOccurs="0"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

@@ -1,0 +1,8 @@
+#2:
+Hash Wert wurde nicht korrekt in das fertige XML eingetragen
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im EPS-Skript: No signature of method: sun.net.www.protocol.https.HttpsURLConnectionImpl.withOutputStream() is applicable for argument types: (script5__Script$_callSetResultsApi_closure5) values: [script5__Script$_callSetResultsApi_closure5@1b9854cb]
+Possible solutions: getOutputStream(), getOutputStream()@ line 234 in script5.groovy.
+The MPL ID for the failed message is : AGhRT-Q4uOO1iQRgf3C1RNYaOyFo

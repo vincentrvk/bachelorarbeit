@@ -1,0 +1,48 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 57: Method definition not expected here. Please define the method at an appropriate place or perhaps try using a block/Closure instead. at line: 57 column: 5. File: script1__Script.groovy @ line 57, column 5.
+String val(String key){
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhShtDmFeKXKm_PIfGgkh3XgSKM
+
+
+#2:
+Request fehlt im Skript
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 16: unable to resolve class groovy.xml.XmlParser
+@ line 16, column 1.
+import groovy.xml.XmlParser
+^
+
+script3__Script.groovy: 151: unable to resolve class QName
+@ line 151, column 29.
+n.name() instanceof QName ? n.name().localPart == 'IRheader' : n.name() == 'IRheader'
+^
+
+2 errors
+.
+The MPL ID for the failed message is : AGhSmq5bi3s3a3O2agZRqxeXaGXh
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: Fehler beim Request-Mapping@ line 289 in script4.groovy.
+The MPL ID for the failed message is : AGhSnA5_OLGMB1e-1-rcMrdqaUDf
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script5__Script.groovy: 15: unable to resolve class com.sap.gateway.ip.core.customdev.util.MessageLog
+@ line 15, column 1.
+import com.sap.gateway.ip.core.customdev.util.MessageLog
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhSnKN7-jDq2GKxTV_kmpifA5Jh
+

@@ -1,0 +1,58 @@
+{
+  "assetsList": {
+    "assets": [
+      {
+        "asset": {
+          "accessData": "public",
+          "assetId": "asset-001",
+          "contentType": "image/jpeg",
+          "description": "Produktbild Sommerkollektion 2025",
+          "variants": [
+            {
+              "fileId": "file-1001",
+              "mimeType": "image/jpeg",
+              "rendition": "preview",
+              "url": "https://cdn.example.com/assets/asset-001/preview.jpg"
+            },
+            {
+              "fileId": "file-1002",
+              "mimeType": "image/jpeg",
+              "rendition": "thumbnail",
+              "url": "https://cdn.example.com/assets/asset-001/thumbnail.jpg"
+            }
+          ],
+          "externalUrl": "https://cdn.example.com/assets/asset-001/preview.jpg",
+          "keywords": "sommer,mode,damen",
+          "thumbnailImageUrl": "https://cdn.example.com/assets/asset-001/thumbnail.jpg",
+          "title": "Sommerkleid Blau"
+        }
+      },
+      {
+        "asset": {
+          "accessData": "restricted",
+          "assetId": "asset-002",
+          "contentType": "application/pdf",
+          "description": "Technisches Datenblatt Klimaanlage",
+          "variants": [
+            {
+              "fileId": "file-2001",
+              "mimeType": "application/pdf",
+              "rendition": "preview",
+              "url": "https://cdn.example.com/assets/asset-002/preview.pdf"
+            },
+            {
+              "fileId": "file-2002",
+              "mimeType": "image/png",
+              "rendition": "thumbnail",
+              "url": "https://cdn.example.com/assets/asset-002/thumbnail.png"
+            }
+          ],
+          "externalUrl": "https://cdn.example.com/assets/asset-002/preview.pdf",
+          "keywords": "technik,klimaanlage,datenblatt",
+          "thumbnailImageUrl": "https://cdn.example.com/assets/asset-002/thumbnail.png",
+          "title": "Datenblatt AC-Modell X"
+        }
+      }
+    ]
+  }
+}

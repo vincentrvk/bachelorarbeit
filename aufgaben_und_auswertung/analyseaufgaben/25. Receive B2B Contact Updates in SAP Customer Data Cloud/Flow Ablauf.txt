@@ -1,0 +1,21 @@
+splitter Business Partner
+
+Account info holen (+token holen +Response von json zu XML konvertieren)
+- ganzen Account
+existiert?
+	- ja: weitermachen
+	- nein: lite Account holen (+token holen +Response von json zu XML konvertieren) -> existiert? exception 
+--> email aus Response extrahieren
+
+
+profile filtern (/root/filter)
+
+changes tracken
+
+modified?
+ja: weitermachen
+nein: exception
+
+token holen
+(string base64-encoden mit einem appkey + signieren)
+

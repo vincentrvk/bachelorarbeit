@@ -1,0 +1,29 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im CDC-Integrationsskript: GET Account CDC fehlgeschlagen (HTTP 400).@ line 195 in script1.groovy.
+The MPL ID for the failed message is : AGhS6FaI409zJp8HOG0ZnBVk5ukE
+
+Request funktioniert nicht
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: java.lang.String.call() is applicable for argument types: (java.lang.String) values: [API_KEY_PROD1]
+Possible solutions: wait(), any(), wait(long), split(java.lang.String), take(int), each(groovy.lang.Closure)@ line 276 in script2.groovy.
+The MPL ID for the failed message is : AGhS6VCja4iroTmfS-fOOQV8dwpx
+
+
+#3:
+Mehrere BusinessPartner mit einmal mal abgeschickt.
+Body: apiKey=API_KEY_PROD1&UID=IAM123456IAM1234567&profile=%7B%22firstName%22%3A%22AnnaAnna%22%2C%22lastName%22%3A%22SchneiderSchneider%22%2C%22city%22%3A%22HamburgHamburg%22%7D
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im CDC-Integrationsskript: CDC-GET-Request schlug fehl (HTTP 400) – Body: <error><msg>Malformed HTTP request sent by client</msg><details>The request was rejected because the URL contained a potentially malicious String "//"</details></error>@ line 278 in script4.groovy.
+The MPL ID for the failed message is : AGhS7CjlOenCJYVG6qCgQrgrnUJ5
+
+--> Grund sind leere Variablen, weil sie nicht global deklariert sind und daher bei Erstellung des URL Pfades leer sind
+("/role/id" => "//")
+
+
+#5:
+Mehrere BusinessPartner mit einmal mal abgeschickt.
+Body: apiKey=API_KEY_PROD1&UID=IAM123456IAM1234567&profile=%7B%22firstName%22%3A%22AnnaAnna%22%2C%22lastName%22%3A%22SchneiderSchneider%22%2C%22city%22%3A%22HamburgHamburg%22%7D

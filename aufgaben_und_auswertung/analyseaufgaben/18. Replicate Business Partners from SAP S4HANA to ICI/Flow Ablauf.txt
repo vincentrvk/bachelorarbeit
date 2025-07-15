@@ -1,0 +1,49 @@
+Headers und Properties festlegen
+
+Splitter für //Product
+
+Filter für //ProductInternalID über 1000 (Custom festgelegt von mir)
++Router: (Wenn nicht, dann brich den Prozess für dieses Produkt ab)
+
+Mapping
+
+Subflow: Check if Product Exists
+- Query die Master Table API
+- Response zu XML konvertieren
+
+Router:
+a) Wenn Produkt existiert -> Update
+- XML zu JSON konvertieren
+- Payload loggen
+- Update Product API callen (POST mit URL Suffix "${property.SysId}/Update") (Response ist JSON)
+- Response loggen
+- JSON zu XML konvertieren
+- Produkt aktivieren (Request)
+- Subflow: Werksinformation speichern
+	- original/eingehenden Payload erneut aufrufen
+	- Splitter für //Plant
+	- Mapping
+	- Existiert das Werk bereits (Request: GET - Ob für DIESES Produkt, dieses Werk bereits existiert?)
+	- XML zu JSON konvertieren
+	- logging
+	- Router: Wenn existiert, dann POST, wenn nicht, dann PUT (mit URL Suffix der "PlantSysId")
+	- log response
+
+
+b) Wenn Produkt nicht existiert -> Create
+- XML zu JSON konvertieren
+- Payload loggen
+- Create Product API callen (POST ohne URL Suffix) (Response ist JSON)
+- Response loggen
+- JSON zu XML konvertieren
+- Produkt aktivieren (Request)
+- Subflow: Werksinformation speichern
+	- original/eingehenden Payload erneut aufrufen
+	- Splitter für //Plant
+	- Mapping
+	- Existiert das Werk bereits (Request: GET - Ob für DIESES Produkt, dieses Werk bereits existiert?)
+	- XML zu JSON konvertieren
+	- logging
+	- Router: Wenn existiert, dann POST, wenn nicht, dann PUT (mit URL Suffix der "PlantSysId")
+	- log response
+

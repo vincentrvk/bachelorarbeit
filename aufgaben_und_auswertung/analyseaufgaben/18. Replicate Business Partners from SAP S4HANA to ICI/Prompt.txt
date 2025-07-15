@@ -1,0 +1,490 @@
+Du sollst ein Skript für die Integration von S4/HANA mit ICI (Sell Side). Es sollen Business Partner in ICI importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+RecipientBusinessSystemID_config = Icertis_SELL
+RecipientBusinessSystemID_payload = //RecipientBusinessSystemID
+SenderBusinessSystemID = //SenderBusinessSystemID
+
+Für jeden BusinessPartner einzeln:
+SupplierCode = //InternalID
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Eingehenden Payload speichern:
+-------------------------------
+- Speichere den eingehenden Payload für die spätere Verarbeitung
+
+
+3. Splitter für Business Partner
+------------------------
+- Vom eingehenden Payload ausgehend
+- Filtere den Payload für das "BusinessPartner"-Tag und verarbeite jeden Business Partner einzeln
+
+
+4. Filter InternalID:
+----------------------------
+- Validiere die Business Partner gemäß den Validierungsregeln
+
+
+5. Request "Check if Business Partner exists":
+-----------------
+Adresse: ${property.requestURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keine
+Query: ${property.SupplierCode}
+Body: keiner
+
+Response Handling: 
+- Wenn der eingehende Body kein BusinessPartner-Objekt enthält, existiert das Produkt nicht -> CREATE
+- Wenn der eingehende Body ein BusinessPartner-Objekt enthält, existiert das Produkt -> UPDATE
+- Entscheide hiernach welchen der folgenden beiden Requests benutzt wird (Schritte 6a oder 6b)
+
+
+6a. Request "UPDATE Business Partner":
+-----------------
+Adresse: ${property.requestURL}/Update
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Business Partner
+
+Response Handling: 
+- kein Response Handling
+
+
+6b. Request "CREATE Business Partner":
+-----------------
+Adresse: ${property.requestURL}/Create
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Business Partner
+
+Response Handling: 
+- kein Response Handling
+
+
+7. Request "Set Active Status":
+-----------------
+Adresse: ${property.requestURL}/${property.SupplierCode}/Activate
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping Business Partner
+
+Response Handling: 
+- kein Response Handling
+
+
+8. Logging:
+------------
+- Logge den Payload in folgenden Fällen als Attachment String
+	- vor jeder Request
+	- nach jeder Request
+	- nach jedem Mapping
+	- vor jedem Mapping
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+- Es werden nur Business Partner mit /BusinessPartner/InternalID höher als 999 verarbeitet (z.B. 1500, 1000)
+- Ist kein Business Partner mit /BusinessPartner/InternalID höher als 999 vorhanden, wirf einen Fehler
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING (Business Partner): 
+Quellfeld -> Zielfeld
+XML -> JSON
+
+NaturalPersonIndicator -> Data.ICMContractingPartyType
+Transformationsregel:
+- Wenn "NaturalPersonIndicator" = true, dann nimm "Customer (Person)" als Zielwert
+- Wenn"NaturalPersonIndicator" = false, dann nimm "Customer" als Zielwert
+
+(/BusinessPartner/InternalID oder /BusinessPartner/Customer/InternalID) und /BusinessPartner/Common/NaturalPersonIndicator -> Data.ICMExternalId
+Transformationsregel: 
+- Wenn "NaturalPersonIndicator" = true, nimm /BusinessPartner/Customer/InternalID als Zielwert
+- Wenn "NaturalPersonIndicator" = false, nimm /BusinessPartner/InternalID als Zielwert
+
+/BusinessPartner/Common/Person/Name/GivenName, /BusinessPartner/Common/Person/Name/FamilyName, /BusinessPartner/Common/Person/Name/AdditionalFamilyName, /BusinessPartner/Common/Organisation/Name/FirstLineName, /BusinessPartner/Common/NaturalPersonIndicator -> Data.Name
+Transformationsregel: 
+- Wenn /BusinessPartner/Common/NaturalPersonIndicator = "true" ist, konkatiniere GivenName, FamilyName und AdditionalFamilyName als Zielwert
+- Wenn /BusinessPartner/Common/NaturalPersonIndicator = "false" ist, nimm /BusinessPartner/Common/Organisation/Name/FirstLineName als Zielwert
+
+/BusinessPartner/Role/RoleCode -> Data.syncRequired
+
+/BusinessPartner/AddressInformation/Address/PostalAddress/CountryCode -> Data.ICMCountryCode.DisplayValue
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+keins
+
+
+---
+Input:
+FLOW INPUT:
+<BusinessPartnerSUITEBulkReplicateRequest xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <MessageHeader>
+    <SenderBusinessSystemID>SYSTEM_ABC</SenderBusinessSystemID>
+    <RecipientBusinessSystemID>SYSTEM_XYZ</RecipientBusinessSystemID>
+  </MessageHeader>
+  <BusinessPartner>
+    <InternalID>BP12345</InternalID>
+    <Customer>
+      <InternalID>CUST9876</InternalID>
+    </Customer>
+    <Common>
+      <NaturalPersonIndicator>true</NaturalPersonIndicator>
+      <Person>
+        <Name>
+          <GivenName>Max</GivenName>
+          <FamilyName>Mustermann</FamilyName>
+          <AdditionalFamilyName>Muster</AdditionalFamilyName>
+        </Name>
+      </Person>
+      <Organisation>
+        <Name>
+          <FirstLineName>Beispiel GmbH</FirstLineName>
+        </Name>
+      </Organisation>
+    </Common>
+    <Role>
+      <RoleCode>ZCUST</RoleCode>
+    </Role>
+    <AddressInformation>
+      <Address>
+        <PostalAddress>
+          <CountryCode>DE</CountryCode>
+        </PostalAddress>
+      </Address>
+    </AddressInformation>
+  </BusinessPartner>
+</BusinessPartnerSUITEBulkReplicateRequest>
+
+
+INPUT REQUEST MAPPING (Business Partner):
+<BusinessPartner>
+    <InternalID>BP12345</InternalID>
+    <Customer>
+      <InternalID>CUST9876</InternalID>
+    </Customer>
+    <Common>
+      <NaturalPersonIndicator>true</NaturalPersonIndicator>
+      <Person>
+        <Name>
+          <GivenName>Max</GivenName>
+          <FamilyName>Mustermann</FamilyName>
+          <AdditionalFamilyName>Muster</AdditionalFamilyName>
+        </Name>
+      </Person>
+      <Organisation>
+        <Name>
+          <FirstLineName>Beispiel GmbH</FirstLineName>
+        </Name>
+      </Organisation>
+    </Common>
+    <Role>
+      <RoleCode>ZCUST</RoleCode>
+    </Role>
+    <AddressInformation>
+      <Address>
+        <PostalAddress>
+          <CountryCode>DE</CountryCode>
+        </PostalAddress>
+      </Address>
+    </AddressInformation>
+  </BusinessPartner>
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+FLOW INPUT SCHEMA:
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xsd:element name="BusinessPartnerSUITEBulkReplicateRequest">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="MessageHeader">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="SenderBusinessSystemID" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="RecipientBusinessSystemID" type="xsd:string" minOccurs="0"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="BusinessPartner" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="InternalID" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="Customer" minOccurs="0">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="InternalID" type="xsd:string" minOccurs="0"/>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="Common" minOccurs="0">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="NaturalPersonIndicator" type="xsd:boolean" minOccurs="0"/>
+                    <xsd:element name="Person" minOccurs="0">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Name" minOccurs="0">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="GivenName" type="xsd:string" minOccurs="0"/>
+                                <xsd:element name="FamilyName" type="xsd:string" minOccurs="0"/>
+                                <xsd:element name="AdditionalFamilyName" type="xsd:string" minOccurs="0"/>
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="Organisation" minOccurs="0">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="Name" minOccurs="0">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="FirstLineName" type="xsd:string" minOccurs="0"/>
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="Role" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="RoleCode" type="xsd:string" minOccurs="0"/>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="AddressInformation" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Address" minOccurs="0">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="PostalAddress" minOccurs="0">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="CountryCode" type="xsd:string" minOccurs="0"/>
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
+
+
+
+
+
+INPUT SCHEMA REQUEST MAPPING (Business Partner):
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified"
+            targetNamespace="http://example.com/businesspartner"
+            xmlns="http://example.com/businesspartner">
+  <xsd:element name="BusinessPartner">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="InternalID" type="xsd:string"/>
+        <xsd:element name="Customer">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="InternalID" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="Common">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="NaturalPersonIndicator" type="xsd:boolean"/>
+              <xsd:element name="Person">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Name">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="GivenName" type="xsd:string"/>
+                          <xsd:element name="FamilyName" type="xsd:string"/>
+                          <xsd:element name="AdditionalFamilyName" type="xsd:string"/>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="Organisation">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Name">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="FirstLineName" type="xsd:string"/>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="Role">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="RoleCode" type="xsd:string"/>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="AddressInformation">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="Address">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="PostalAddress">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="CountryCode" type="xsd:string"/>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING (Business Partner):
+{
+  "Data": {
+    "ICMContractingPartyType": "Individual",
+    "ICMExternalId": "BP12345",
+    "Name": "Max Mustermann",
+    "syncRequired": ["true"],
+    "ICMCountryCode": {
+      "DisplayValue": "DE"
+    }
+  }
+}
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING (Business Partner):
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "Data": {
+      "type": "object",
+      "properties": {
+        "ICMContractingPartyType": {
+          "type": "string"
+        },
+        "ICMExternalId": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "syncRequired": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ICMCountryCode": {
+          "type": "object",
+          "properties": {
+            "DisplayValue": {
+              "type": "string"
+            }
+          },
+          "required": ["DisplayValue"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "ICMContractingPartyType",
+        "ICMExternalId",
+        "Name",
+        "syncRequired",
+        "ICMCountryCode"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["Data"],
+  "additionalProperties": false
+}
+
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

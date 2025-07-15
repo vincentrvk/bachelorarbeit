@@ -1,0 +1,33 @@
+Outbound GET Request -> Response CSV Body (Header: 
+PR_Creation_List,PR_PO_Status,Created_By,Request_ID,PR_Number,Unique_Key,Request_Name,Contract_Reference,Anaplan_Line_Number,PR_Line_Number,Quantity,Price,Supplier_Code,SKU,Deliver_To_Code,Need_By_Date
+)
+
+set Header:
+SAP_Receiver = Ariba
+SAP_Sender = Anaplan
+MessageID = SAP_MessageProcessingLogID
+
+Script: Wenn Body leer ( Body == [] oder Body == [ ] ) oder nur Header hat, Body auf "" setzen, ansonsten beibehalten und property "payload" setzen
+
+CSV -> XML Converter
+
+Script: Map bauen und neue XML formen
+- Map aus vorhandenen purchase request via "Request_ID" (kann mehrere PRs für eine Request_ID geben) und dann die Purchase request selbst der map hinzufügen
+- neue XML bauen: 
+	- für jeden eintrag der map (also requestId) wird für jede der dazugehörigen Requests der Liste ein "PR" Tag erzeugt mit allen child tags
+- "root" drumrum
+
+Splitter
+//Purchase_Request
+
+Mapping ins Zielformat
+
+Gather
+
+Nochmal Splitter
+//PURCHASE_REQUISITION
+
+Abschicken
+
+Response Process Direct
+

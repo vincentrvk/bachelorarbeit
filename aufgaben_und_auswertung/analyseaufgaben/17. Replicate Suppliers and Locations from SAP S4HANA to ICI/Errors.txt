@@ -1,0 +1,53 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 159: unexpected token: DE @ line 159, column 53.
+Code { DisplayValue 'DE' }
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRmBMvCZj-02uisoy0OZ7kJmah
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: Cannot cast object '123e4567-e89b-12d3-a456-4266141740001001falsefalseMaxMustermannBeispiel GmbHaddress-00142AZCUST' with class 'groovy.util.slurpersupport.FilteredNodeChildren' to class 'java.util.List'@ line 325 in script2.groovy.
+The MPL ID for the failed message is : AGhRmJuu6Pp1Qm_9-bkCERG1jAtm
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 160: The current scope already contains a variable of the name destName
+@ line 160, column 38.
+Name destName
+^
+
+script3__Script.groovy: 160: unable to resolve class Name
+@ line 160, column 38.
+Name destName
+^
+
+2 errors
+.
+The MPL ID for the failed message is : AGhRmRPDH5PiJtFaEsjhNg35fPz5
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 194: unexpected token: DE @ line 194, column 43.
+ICMCountryCode { DisplayValue 'DE' }
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRmZ4gbsKeBuZRSYtrNXKwauEz
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script5__Script.groovy: 189: unexpected token: DE @ line 189, column 55.
+ryCode { DisplayValue 'DE'
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhRmwCi738CbPf65uO1jgi4efqF

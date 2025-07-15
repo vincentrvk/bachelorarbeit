@@ -1,0 +1,512 @@
+Du sollst ein Skript für die Integration von S/4HANA Cloud und CCH Sure Tax bauen. In dieser Integration soll der Zuständigkeitsbereich (jurisdiction) bestimmt werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+sureTaxUsername = 
+sureTaxPassword = 
+sureTaxURL = 
+exchangejcdunifyind = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/JCD_UNIFY_IND/text()
+exchangeEnableAV = 0
+exchangestreet1 = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/STREET_ADDRESS/STREET1/text()
+exchangestreet = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/STREET_ADDRESS/STREET/text()
+exchangeoutofcity = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/OUTOF_CITY/text()
+exchangestate = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/STATE/text()
+exchangecounty = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/COUNTY/text()
+exchangecity = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/CITY/text()
+exchangezipcode = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/ZIPCODE/text()
+exchangecountry = /n0:TAX_JURISDICTION_SEND/LOCATION_DATA/COUNTRY/text()
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+2. Entscheidung Adressnutzung:
+------------------------------
+- Setzen und Festlegen der Property "UseSureAddress":
+	- "true", wenn: 
+		- ${property.exchangeEnableAV} nicht null, placeholder oder leer ist,
+		- ${property.exchangestreet} vorhanden ist,
+		- ${property.exchangestate} vorhanden ist und 
+		- ${property.exchangezipcode} oder ${property.exchangecity} vorhanden ist 
+	- "false" wenn nicht
+- Festlegen des URL-Suffix (an sureTaxURL anfügen):
+	- "/useTax", wenn ${property.UseSureAddress} = "false"
+	- "/useAddress", wenn ${property.UseSureAddress} = "true" 
+
+3. Mapping Entscheidung:
+------------------------
+- Wenn ${property.UseSureAddress} = "false", nutze das Request-Mapping "GetJurisdictionWithoutAddress"
+- Wenn ${property.UseSureAddress} = "true", nutze das Request-Mapping "GetJurisdictionWithAddress"
+- siehe Mapping-Anforderungen
+
+
+4. Request "Get Jurisdiction":
+-----------------
+Adresse: ${property.sureTaxURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach entsprechendem Request-Mapping
+
+Response Handling: 
+- Die Antwort muss gemäß den Regeln des entsprechenden Response-Mappings behandelt werden
+
+5. Logging:
+----------------------
+- Folgende Schritte müssen geloggt und als Message-Attachment (als String) angehangen werden:
+	1. Eingehender Payload
+	2. Nach dem Request-Mapping 
+	3. Response Payload
+	4. Nach dem Response-Mapping
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+Validierungsregeln:
+- Property ${property.exchangecountry} muss vorhanden sein, sonst Fehlermeldung werfen (required)
+- Property ${property.exchangestate} muss vorhanden sein, sonst Fehlermeldung werfen (required)
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING (GetJurisdictionWithoutAddress):
+Quellfeld -> Zielfeld
+
+${property.sureTaxUsername} = /ns1:GetGeocodeByZipcodeOrAddress/ns1:ClientNumber
+
+aktuelles Jahr -> /ns1:GetGeocodeByZipcodeOrAddress/ns1:DataYear
+Transformationsregel:
+- schreibe das aktuelle Jahr im "yyyy" Format als Zielwert
+
+ZIPCODE, COUNTRY -> /ns1:GetGeocodeByZipcodeOrAddress/ns1:Zipcode
+Transformationsregel:
+- Wenn COUNTRY = "USA" oder "US" ist, nimm ZIPCODE als Zielwert
+- Ansonsten nimm vom tokenized ("-") ZIPCODE den ersten Wert als Zielwert
+
+COUNTRY -> /ns1:GetGeocodeByZipcodeOrAddress/ns1:CountryCode
+
+CITY -> /ns1:GetGeocodeByZipcodeOrAddress/ns1:City
+Transformationsregel:
+- Wenn CITY existiert, nimm den CITY als Zielwert,
+- Ansonsten schreibe einen leeren String
+
+
+REQUEST-MAPPING (GetJurisdictionWithAddress):
+Quellfeld -> Zielfeld
+
+${property.sureTaxUsername} -> /ns4:SoapRequest/ns4:request/ns4:ClientNumber
+
+STREET -> /ns4:SoapRequest/ns4:request/ns4:PrimaryAddressLine
+
+STREET1 -> /ns4:SoapRequest/ns4:request/ns4:SecondaryAddressLine
+Transformationsregel:
+- Wenn STREET1 existiert, nimm STREET1 als Zielwert,
+- Ansonsten schreibe einen leeren String
+
+ZIPCODE, COUNTRY -> /ns4:SoapRequest/ns4:request/ns4:ZIPCode
+Transformationsregel:
+- Wenn COUNTRY = "USA" oder "US" ist, nimm ZIPCODE als Zielwert
+- Ansonsten nimm vom tokenized ("-") ZIPCODE den ersten Wert als Zielwert
+
+"S" -> /ns4:SoapRequest/ns4:request/ns4:ResponseType
+
+
+RESPONSE-MAPPING (GetJurisdictionWithoutAddress):
+Quellfeld -> Zielfeld
+
+"0" -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_HEADER/RETCODE
+
+${property.exchangecountry} -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/COUNTRY
+
+${property.exchangestate} -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/STATE
+
+${property.exchangezipcode} -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/ZIPCODE
+
+ns1:Geocode, ns1:StateCode -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/TXJCD
+Transformationsregel:
+- Wenn ${property.exchangejcdunifyind} = "X" (case-insensitive), füge den Zielwert wiefolgt zusammen:
+	- die ersten 2 Zeichen des Geocode + StateCode + die restlichen Zeichen des Geocode + "-"
+- Ansonsten nimm den Geocode als Zielwert
+
+
+RESPONSE-MAPPING (GetJurisdictionWithAddress):
+Quellfeld -> Zielfeld
+
+"0" -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_HEADER/RETCODE
+
+${property.exchangecountry} -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/COUNTRY
+
+ns0:State -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/STATE
+
+ns0:Geocode, ns0:State -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/TXJCD
+Transformationsregel:
+- Wenn ${property.exchangejcdunifyind} = "X" (case-insensitive), füge den Zielwert wiefolgt zusammen:
+	- die ersten 2 Zeichen des Geocode + StateCode + die restlichen Zeichen des Geocode + "-"
+- Ansonsten nimm den Geocode als Zielwert
+
+ns0:PrimaryAddressLine -> /ns2:TAX_JURISDICTION_RECEIVE/LOCATION_RESULTS/STREET_ADDRESS/STREET
+
+
+---
+Input:
+INPUT REQUEST MAPPING (für beide Requests):
+<?xml version="1.0" encoding="UTF-8"?>
+<n0:TAX_JURISDICTION_SEND xmlns:n0="http://sap.com/xi/FotETaxUS">
+  <LOCATION_DATA>
+    <JCD_UNIFY_IND>X</JCD_UNIFY_IND>
+    <COUNTRY>USA</COUNTRY>
+    <STATE>CA</STATE>
+    <COUNTY>Santa Clara</COUNTY>
+    <CITY>San Jose</CITY>
+    <ZIPCODE>95110</ZIPCODE>
+    <OUTOF_CITY>N</OUTOF_CITY>
+    <STREET_ADDRESS>
+      <STREET>123 Main St</STREET>
+      <STREET1>Suite 400</STREET1>
+    </STREET_ADDRESS>
+  </LOCATION_DATA>
+</n0:TAX_JURISDICTION_SEND>
+
+
+
+INPUT RESPONSE MAPPING (GetJurisdictionWithoutAddress):
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:ns1="http://service.example.com/xsd">
+  <soapenv:Body>
+    <ns1:GetGeocodeByZipcodeOrAddressResponse>
+      <ns1:Geocode>52.5200,13.4050</ns1:Geocode>
+      <ns1:StateCode>BE</ns1:StateCode>
+    </ns1:GetGeocodeByZipcodeOrAddressResponse>
+  </soapenv:Body>
+</soapenv:Envelope>
+
+
+INPUT RESPONSE MAPPING (GetJurisdictionWithAddress):
+<ns0:SoapRequestResponse xmlns:ns0="http://sureaddress.net/">
+  <ns0:SoapRequestResult>
+    <ns0:State>CA</ns0:State>
+    <ns0:GeoCode>123456</ns0:GeoCode>
+    <ns0:PrimaryAddressLine>1600 Amphitheatre Parkway</ns0:PrimaryAddressLine>
+  </ns0:SoapRequestResult>
+</ns0:SoapRequestResponse>
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING (für beide Requests):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://sap.com/xi/FotETaxUS" 
+    xmlns="http://sap.com/xi/FotETaxUS" 
+    elementFormDefault="qualified">
+
+  <!-- Root element -->
+  <xs:element name="TAX_JURISDICTION_SEND">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="LOCATION_DATA" type="LOCATION_DATA"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- LOCATION_DATA structure with only required children -->
+  <xs:complexType name="LOCATION_DATA">
+    <xs:sequence>
+      <xs:element name="JCD_UNIFY_IND" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:length value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="COUNTRY" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="3"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="STATE" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="3"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="COUNTY" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="35"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="CITY" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="35"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ZIPCODE" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="OUTOF_CITY" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:length value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="STREET_ADDRESS" minOccurs="0" type="STREET_ADDRESS_SIMPLE"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- STREET_ADDRESS_SIMPLE with STREET and STREET1 -->
+  <xs:complexType name="STREET_ADDRESS_SIMPLE">
+    <xs:sequence>
+      <xs:element name="STREET" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="60"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="STREET1" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="40"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+
+
+
+INPUT SCHEMA RESPONSE MAPPING (GetJurisdictionWithoutAddress):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns1="http://service.example.com/xsd"
+           targetNamespace="http://service.example.com/xsd"
+           elementFormDefault="qualified">
+  <xs:element name="GetGeocodeByZipcodeOrAddressResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Geocode" type="xs:string"/>
+        <xs:element name="StateCode" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+INPUT SCHEMA RESPONSE MAPPING (GetJurisdictionWithAddress):
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sureaddress.net/"
+           xmlns:ns0="http://sureaddress.net/"
+           elementFormDefault="qualified">
+  <xs:element name="SoapRequestResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SoapRequestResult" type="ns0:AddressResponse" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="AddressResponse">
+    <xs:sequence>
+      <xs:element name="State" type="xs:string" minOccurs="0"/>
+      <xs:element name="GeoCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrimaryAddressLine" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING (GetJurisdictionWithoutAddress):
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:ns1="http://service.example.com/xsd">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ns1:GetGeocodeByZipcodeOrAddress>
+         <ns1:ClientNumber>123456</ns1:ClientNumber>
+         <ns1:DataYear>2025</ns1:DataYear>
+         <ns1:Zipcode>10115</ns1:Zipcode>
+         <ns1:CountryCode>DE</ns1:CountryCode>
+         <ns1:City>Berlin</ns1:City>
+      </ns1:GetGeocodeByZipcodeOrAddress>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+OUTPUT REQUEST MAPPING (GetJurisdictionWithAddress):
+<ns4:SoapRequest xmlns:ns4="http://sureaddress.net/">
+  <ns4:request>
+    <ns4:ClientNumber>123456</ns4:ClientNumber>
+    <ns4:PrimaryAddressLine>123 Main Street</ns4:PrimaryAddressLine>
+    <ns4:SecondaryAddressLine>Suite 400</ns4:SecondaryAddressLine>
+    <ns4:ZIPCode>90210</ns4:ZIPCode>
+    <ns4:ResponseType>Detailed</ns4:ResponseType>
+  </ns4:request>
+</ns4:SoapRequest>
+
+
+OUTPUT RESPONSE MAPPING (GetJurisdictionWithoutAddress):
+<ns2:TAX_JURISDICTION_RECEIVE xmlns:ns2="http://sap.com/xi/FotETaxUS">
+  <LOCATION_HEADER>
+    <RETCODE>0</RETCODE>
+  </LOCATION_HEADER>
+  <LOCATION_RESULTS>
+    <COUNTRY>USA</COUNTRY>
+    <STATE>NY</STATE>
+    <ZIPCODE>10001</ZIPCODE>
+    <TXJCD>123456789012345</TXJCD>
+  </LOCATION_RESULTS>
+</ns2:TAX_JURISDICTION_RECEIVE>
+
+
+OUTPUT RESPONSE MAPPING (GetJurisdictionWithAddress):
+<ns2:TAX_JURISDICTION_RECEIVE xmlns:ns2="http://sap.com/xi/FotETaxUS">
+  <LOCATION_HEADER>
+    <RETCODE>0</RETCODE>
+  </LOCATION_HEADER>
+  <LOCATION_RESULTS>
+    <COUNTRY>USA</COUNTRY>
+    <STATE>NY</STATE>
+    <TXJCD>123456789012345</TXJCD>
+    <STREET_ADDRESS>
+      <STREET>350 5th Ave</STREET>
+    </STREET_ADDRESS>
+  </LOCATION_RESULTS>
+</ns2:TAX_JURISDICTION_RECEIVE>
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING (GetJurisdictionWithoutAddress):
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://service.example.com/xsd"
+           xmlns="http://service.example.com/xsd"
+           elementFormDefault="qualified">
+  <xs:element name="GetGeocodeByZipcodeOrAddress">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ClientNumber" type="xs:string"/>
+        <xs:element name="DataYear" type="xs:int"/>
+        <xs:element name="Zipcode" type="xs:string"/>
+        <xs:element name="CountryCode" type="xs:string"/>
+        <xs:element name="City" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+OUTPUT SCHEMA REQUEST MAPPING (GetJurisdictionWithAddress):
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns4="http://sureaddress.net/"
+           targetNamespace="http://sureaddress.net/"
+           elementFormDefault="qualified">
+  <xs:element name="SoapRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="request" type="ns4:AddressRequest"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="AddressRequest">
+    <xs:sequence>
+      <xs:element name="ClientNumber" type="xs:string" minOccurs="0"/>
+      <xs:element name="PrimaryAddressLine" type="xs:string" minOccurs="0"/>
+      <xs:element name="SecondaryAddressLine" type="xs:string" minOccurs="0"/>
+      <xs:element name="ZIPCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="ResponseType" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+
+OUTPUT SCHEMA RESPONSE MAPPING (für beide Responses):
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns="http://sap.com/xi/FotETaxUS"
+           targetNamespace="http://sap.com/xi/FotETaxUS"
+           elementFormDefault="qualified">
+  <xs:element name="TAX_JURISDICTION_RECEIVE">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="LOCATION_HEADER" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="RETCODE" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:length value="1"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="LOCATION_RESULTS" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="COUNTRY" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="STATE" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="3"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ZIPCODE" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="TXJCD" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="STREET_ADDRESS" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="STREET" minOccurs="0">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:maxLength value="60"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,356 @@
+Du sollst ein Skript für die Integration von SAP Master Data Integration und SAP Customer Data Cloud erstellen. Es sollen B2C Contact Updates in die SAP Customer Data Cloud repliziert werden.
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+plainHMACKeyForSignature = gekmN8CFr6PngJ9xTGMOMpdTFAvcssg5
+apiKey = API_KEY_PROD1 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Splitter:
+-----------
+- Führe die nachfolgenden Schritte für jedes (//BusinessPartnerSUITEReplicateRequestMessage/BusinessPartner) Element einzeln durch
+
+
+3. JWT-Token Erstellung:
+-----------------------
+- Diese Schritte müssen vor jeder Request ausgeführt werden
+- Der JWT-Token setzt sich wiefolgt zusammen:
+	- jwtHeader = base64encoded({"alg":"RS256","typ":"JWT","kid":"${property.apiKey}"})
+	- jwtClaim = base64encoded({aktueller Unix Timestamp in Sekunden})
+	- JWT-Token = jwtHeader.jwtClaim
+	
+	
+4. Extrahiere Profil UID:
+------------------------
+- Extrahiere aus dem Profil die UID und speichere sie in der Property "profileID"
+- Pfad: //BusinessPartner/Common/IAMID/text()
+
+
+5. Extrahiere Profil Rolle:
+------------------------
+- Extrahiere aus dem Profil die Rolle und speichere sie in der Property "role"
+- Pfad: //BusinessPartner/Role/RoleCode/text()
+
+
+5. Request "Get Account":
+-----------------
+Adresse: ${property.requestURL}/${property.role}/{property.profileID}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: 
+- "JWT-Token": JWT-Token
+- "CDCSignature": Signierter JWT-Token (HmacSHA256)
+Body: keiner
+
+Response Handling: 
+- JSON Response ist neuer Payload
+
+
+6. Filter Profil:
+-----------------
+- Benutze nur noch den "profile"-Teil aktuellen JSON Payloads
+
+
+7. Vergleiche Profile:
+---------------------
+- Vergleiche das in der Response erhaltene Profil mit zu importierenden:
+	- Wenn Unterschiede vorhanden sind, fahre fort
+	- Sind keine Unterschiede vorhanden, wirf einen Fehler
+	- Ist kein Profil für die ID vorhanden, fahre fort
+- Baue eine JSON mit den aktualisierten und neuen Feldern
+
+
+8. Request Body:
+----------------
+- Baue folgende String für den Payload
+- "apiKey=" + {property.apiKey} + "&UID=" + {property.profileID} + "&profile=" + {komplettes, aktualisiertes Profil als JSON-String}
+
+
+9. Request "Update Profile":
+-----------------
+Adresse: ${property.requestURL}/{property.profileID}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header:
+- "JWT-Token": JWT-Token
+- "CDCSignature": Signierter JWT-Token (HmacSHA256)
+Body: JSON Body nach dem Vergleich
+
+Response Handling: 
+- kein Response Handling
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+keins
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+kein Response Mapping
+keins
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<BusinessPartnerSUITEReplicateRequestMessage xmlns="http://sap.com/xi/SAPGlobal20/Global">
+  <MessageHeader>
+    <ID>MSG-20250603-002</ID>
+    <CreationDateTime>2025-06-03T12:00:00Z</CreationDateTime>
+  </MessageHeader>
+
+  <BusinessPartner>
+    <ReceiverUUID>550e8400-e29b-41d4-a716-446655440000</ReceiverUUID>
+	<Common>
+      <IAMID>IAM123456</IAMID>
+    </Common>
+    <Role>
+      <RoleCode>prospect</RoleCode>
+    </Role>
+
+    <Name>
+      <FirstName>Anna</FirstName>
+      <LastName>Schneider</LastName>
+    </Name>
+
+    <Address>
+      <City>Hamburg</City>
+    </Address>
+  </BusinessPartner>
+</BusinessPartnerSUITEReplicateRequestMessage>
+
+
+
+
+INPUT RESPONSE MAPPING (Prospect):
+{
+  "header": {
+    "messageId": "MSG-20250603-001",
+    "timestamp": "2025-06-03T10:30:00Z"
+  },
+  "results": [
+    {
+      "profile": {
+        "firstName": "Max",
+        "lastName": "Mustermann",
+        "city": "Berlin",
+        "email": "max.mustermann@example.com",
+        "username": "m.mustermann"
+      }
+    },
+    {
+      "opportunityInformation": {
+        "projectType": "IT-Modernisierung",
+        "estimatedBudgetEUR": 250000,
+        "expectedStartDate": "2025-09-01"
+      }
+    }
+  ]
+}
+
+
+
+INPUT RESPONSE MAPPING (Customer):
+{
+   "header":{
+      "messageId":"MSG-20250603-001",
+      "timestamp":"2025-06-03T10:30:00Z"
+   },
+   "profile":{
+      "firstName":"Max",
+      "lastName":"Mustermann",
+      "city":"Berlin",
+      "email":"max.mustermann@example.com",
+      "username":"m.mustermann"
+   }
+}
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://sap.com/xi/SAPGlobal20/Global" 
+    xmlns="http://sap.com/xi/SAPGlobal20/Global" 
+    elementFormDefault="qualified">
+  <xs:element name="BusinessPartnerSUITEReplicateRequestMessage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MessageHeader">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ID" type="xs:string"/>
+              <xs:element name="CreationDateTime" type="xs:dateTime"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="BusinessPartner">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ReceiverUUID" type="xs:string"/>
+              <xs:element name="Role">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="RoleCode" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Name">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="FirstName" type="xs:string"/>
+                    <xs:element name="LastName" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="City" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING (Prospect):
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["messageId", "timestamp"]
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "anyOf": [
+          {
+            "properties": {
+              "profile": {
+                "type": "object",
+                "properties": {
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" },
+                  "city": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "username": { "type": "string" }
+                },
+                "required": ["firstName", "lastName", "city"]
+              }
+            },
+            "required": ["profile"]
+          },
+          {
+            "properties": {
+              "opportunityInformation": {
+                "type": "object",
+                "properties": {
+                  "projectType": { "type": "string" },
+                  "estimatedBudgetEUR": { "type": "number" },
+                  "expectedStartDate": { "type": "string", "format": "date" }
+                },
+                "required": ["projectType", "estimatedBudgetEUR", "expectedStartDate"]
+              }
+            },
+            "required": ["opportunityInformation"]
+          }
+        ]
+      }
+    }
+  },
+  "required": ["header", "results"]
+}
+
+
+
+INPUT SCHEMA RESPONSE MAPPING (Customer):
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["messageId", "timestamp"]
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "city": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "username": { "type": "string" }
+      },
+      "required": ["firstName", "lastName", "city", "email", "username"]
+    }
+  },
+  "required": ["header", "profile"]
+}
+
+
+
+
+Output:
+OUTPUT REQUEST MAPPING:
+keins
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+keins
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

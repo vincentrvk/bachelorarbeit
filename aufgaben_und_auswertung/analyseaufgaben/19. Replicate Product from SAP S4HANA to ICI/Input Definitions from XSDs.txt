@@ -1,0 +1,870 @@
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="AddressInformation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="UUID" type="xs:string" />
+        <xs:element name="MoveDestinationAddressUUID" nillable="true" />
+        <xs:element name="MoveDate" nillable="true" />
+        <xs:element name="ValidityPeriod">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="StartDate" type="xs:date" />
+              <xs:element name="EndDate" type="xs:date" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element maxOccurs="unbounded" name="AddressUsage">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="AddressUsageCode" type="xs:string" />
+              <xs:element name="ValidityPeriod">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="StartDate" type="xs:date" />
+                    <xs:element name="EndDate" type="xs:date" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="DefaultIndicator" type="xs:boolean" />
+            </xs:sequence>
+            <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Address">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CommunicationPreference">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CorrespondenceLanguageCode" type="xs:string" />
+                    <xs:element name="PreferredCommunicationMediumTypeCode" nillable="true" />
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Email">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="URI" type="xs:string" />
+                    <xs:element name="UsageDeniedIndicator" type="xs:boolean" />
+                    <xs:element name="ValidityPeriod">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="StartDate" type="xs:date" />
+                          <xs:element name="EndDate" type="xs:date" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="TransportNeutralEncapsulationFormatEnabledIndicator" type="xs:boolean" />
+                    <xs:element maxOccurs="unbounded" name="EmailUsage">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Usage">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Code" type="xs:string" />
+                                <xs:element name="ValidityPeriod">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="StartDate" type="xs:date" />
+                                      <xs:element name="EndDate" type="xs:date" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="DefaultIndicator" type="xs:boolean" />
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                  <xs:attribute name="eMailNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="eMailUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="PostalAddress">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CountryCode" type="xs:string" />
+                    <xs:element name="RegionCode" nillable="true" />
+                    <xs:element name="CityName" type="xs:string" />
+                    <xs:element name="AdditionalCityName" nillable="true" />
+                    <xs:element name="DistrictName" nillable="true" />
+                    <xs:element name="StreetPostalCode" type="xs:unsignedShort" />
+                    <xs:element name="POBoxPostalCode" nillable="true" />
+                    <xs:element name="CompanyPostalCode" nillable="true" />
+                    <xs:element name="StreetPrefixName" nillable="true" />
+                    <xs:element name="AdditionalStreetPrefixName" nillable="true" />
+                    <xs:element name="StreetName" type="xs:string" />
+                    <xs:element name="StreetSuffixName" nillable="true" />
+                    <xs:element name="AdditionalStreetSuffixName" nillable="true" />
+                    <xs:element name="HouseID" type="xs:string" />
+                    <xs:element name="AdditionalHouseID" nillable="true" />
+                    <xs:element name="BuildingID" nillable="true" />
+                    <xs:element name="RoomID" nillable="true" />
+                    <xs:element name="FloorID" nillable="true" />
+                    <xs:element name="CareOfName" nillable="true" />
+                    <xs:element name="StreetAddressMailNonDeliveryReasonCode" nillable="true" />
+                    <xs:element name="POBoxDeviatingCountryCode" nillable="true" />
+                    <xs:element name="POBoxDeviatingRegionCode" nillable="true" />
+                    <xs:element name="POBoxDeviatingCityName" nillable="true" />
+                    <xs:element name="POBoxLobbyName" nillable="true" />
+                    <xs:element name="POBoxID" nillable="true" />
+                    <xs:element name="POBoxAddressMailNonDeliveryReasonCode" nillable="true" />
+                    <xs:element name="POBoxIDVisibleIndicator" type="xs:boolean" />
+                    <xs:element name="POBoxDeliveryServiceID" nillable="true" />
+                    <xs:element name="POBoxDeliveryServiceTypeCode" nillable="true" />
+                    <xs:element name="TaxJurisdictionCode" nillable="true" />
+                    <xs:element name="TimeZoneCode" type="xs:string" />
+                    <xs:element name="TransportationZoneID" nillable="true" />
+                    <xs:element name="RegionalStructureElementGroupCode" nillable="true" />
+                    <xs:element name="RegionalStructureAddressConsistencyStatusCode" nillable="true" />
+                    <xs:element name="RegionalStructureCityCode" nillable="true" />
+                    <xs:element name="AdditionalRegionalStructureCityCode" nillable="true" />
+                    <xs:element name="POBoxDeviatingRegionalStructureCityCode" nillable="true" />
+                    <xs:element name="RegionalStructureDistrictCode" nillable="true" />
+                    <xs:element name="RegionalStructureStreetCode" nillable="true" />
+                    <xs:element name="ExtendedBuildingID" nillable="true" />
+                    <xs:element name="LegacyAddressID" nillable="true" />
+                    <xs:element name="CountyName" nillable="true" />
+                    <xs:element name="RegionalStructureCountyCode" nillable="true" />
+                    <xs:element name="TownshipName" nillable="true" />
+                    <xs:element name="RegionalStructureTownshipCode" nillable="true" />
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element maxOccurs="unbounded" name="Telephone">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Number">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="SubscriberID" type="xs:unsignedLong" />
+                          <xs:element name="ExtensionID" nillable="true" />
+                          <xs:element name="CountryCode" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="FormattedNumberDescription" type="xs:long" />
+                    <xs:element name="UsageDeniedIndicator" type="xs:boolean" />
+                    <xs:element name="ValidityPeriod">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="StartDate" type="xs:date" />
+                          <xs:element name="EndDate" type="xs:date" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="MobilePhoneNumberIndicator" type="xs:boolean" />
+                    <xs:element name="SMSEnabledIndicator" type="xs:boolean" />
+                    <xs:element maxOccurs="unbounded" name="TelephoneUsage">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Usage">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Code" type="xs:string" />
+                                <xs:element name="ValidityPeriod">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element name="StartDate" type="xs:date" />
+                                      <xs:element name="EndDate" type="xs:date" />
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="DefaultIndicator" type="xs:boolean" />
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                  <xs:attribute name="telephoneNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="telephoneUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="addressNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="emailListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="facsimileListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="organisationNameListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="personNameListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="postalAddressListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="telephoneListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="webListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="addressUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element minOccurs="0" name="BusinessPartner">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="UUID" type="xs:string" />
+        <xs:element minOccurs="0" name="InternalID" type="xs:unsignedShort" />
+        <xs:element minOccurs="0" name="CategoryCode" type="xs:unsignedByte" />
+        <xs:element minOccurs="0" name="NumberRangeIntervalBusinessPartnerGroupCode" type="xs:string" />
+        <xs:element minOccurs="0" name="Customer">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="InternalID" type="xs:unsignedShort" />
+              <xs:element minOccurs="0" name="MaintenanceProfileCode" type="xs:string" />
+              <xs:element minOccurs="0" name="AuthorisationGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="ExpressTrainStationLocationName" nillable="true" />
+              <xs:element minOccurs="0" name="TrainStationLocationName" nillable="true" />
+              <xs:element minOccurs="0" name="CustomerPartyWithFiscalAddressInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="ReceiverCustomerPartyWithFiscalAddressInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="AlternativePayeePartyInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="ReceiverAlternativePayeePartyInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="AlternativePayeeAllowedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="CorporateGroupName" nillable="true" />
+              <xs:element minOccurs="0" name="StandardPointLocationCode" nillable="true" />
+              <xs:element minOccurs="0" name="DeletionBlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="DeletedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="CountyCode" nillable="true" />
+              <xs:element minOccurs="0" name="CityCode" nillable="true" />
+              <xs:element minOccurs="0" name="PostingBlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="EqualizationTaxRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="ValueAddedTaxRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="TradingPartnerCompanyID" nillable="true" />
+              <xs:element minOccurs="0" name="TaxGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="ICMSExemptionIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="IPIExemptionIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="TaxSubstitutionGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="CFOPCategoryCode" nillable="true" />
+              <xs:element minOccurs="0" name="SaleSalesAndDistributionBlocks">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="OrderBlockingReasonCode" nillable="true" />
+                    <xs:element minOccurs="0" name="BillingBlockingReasonCode" nillable="true" />
+                    <xs:element minOccurs="0" name="DeliveryBlockingReasonCode" nillable="true" />
+                    <xs:element minOccurs="0" name="SalesSupportBlockedIndicator" type="xs:boolean" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="IndustrySector">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="IndustrialSectorCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FirstAdditionalIndustrialSectorCode" nillable="true" />
+                    <xs:element minOccurs="0" name="SecondAdditionalIndustrialSectorCode" nillable="true" />
+                    <xs:element minOccurs="0" name="ThirdAdditionalIndustrialSectorCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FourthAdditionalIndustrialSectorCode" nillable="true" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="MarketingAttributes">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="CustomerGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="CustomerNielsenRegionCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FiscalYearVariantCode" nillable="true" />
+                    <xs:element minOccurs="0" name="AnnualSalesVolumeAmount" nillable="true">
+                      <xs:complexType>
+                        <xs:attribute name="currencyCode" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="AnnualSalesVolumeAmountReportedYear" type="xs:unsignedByte" />
+                    <xs:element minOccurs="0" name="EmployeeNumberValue" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeNumberValueReportedYear" type="xs:unsignedByte" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="CustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="FirstAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="SecondAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="ThirdAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="FourthAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="FifthAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="SixthAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="SeventhAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="EighthAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="NinthAdditionalCustomerExtensionCode" nillable="true" />
+              <xs:element minOccurs="0" name="DataMediumExchangeReportCode" nillable="true" />
+              <xs:element minOccurs="0" name="DataMediumExchangeInstructionCode" nillable="true" />
+              <xs:element minOccurs="0" name="CivilUseIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="MilitaryUseIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="LegalControlIndicators">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="BiochemicalWarfareIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="NuclearNonproliferationIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="NationalSecurityIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="MissileTechnologyIndicator" type="xs:boolean" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="PriceSpecifications">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="CustomerConditionGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FirstAdditionalCustomerConditionGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="SecondAdditionalCustomerConditionGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="ThirdAdditionalCustomerConditionGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FourthAdditionalCustomerConditionGroupCode" nillable="true" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="RepresentativeName" nillable="true" />
+              <xs:element minOccurs="0" name="BusinessTypeName" nillable="true" />
+              <xs:element minOccurs="0" name="IndustryTypeName" nillable="true" />
+              <xs:element minOccurs="0" name="RelatedSupplierInternalID" nillable="true" />
+            </xs:sequence>
+            <xs:attribute name="accountingInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="salesArrangementListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="unloadingPointsListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="taxClassificationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="customerTextListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="customerDocumentListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="propertyListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="propertyValuationCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="Supplier">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="InternalID" type="xs:unsignedShort" />
+              <xs:element minOccurs="0" name="CreditorInformationNumber" nillable="true" />
+              <xs:element minOccurs="0" name="MaintenanceProfileCode" type="xs:string" />
+              <xs:element minOccurs="0" name="ProcurementTransactionBlockingCode" nillable="true" />
+              <xs:element minOccurs="0" name="DeletionBlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="DeletedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="PostingBlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="PurchasingBlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="TradingPartnerCompanyID" nillable="true" />
+              <xs:element minOccurs="0" name="ManufacturerPartyID" nillable="true" />
+              <xs:element minOccurs="0" name="AuthorisationGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="CorporateGroupName" nillable="true" />
+              <xs:element minOccurs="0" name="ProofOfDeliveryRequirementCode" nillable="true" />
+              <xs:element minOccurs="0" name="CreditDataLastCheckDate" nillable="true" />
+              <xs:element minOccurs="0" name="TrainStationLocationName" nillable="true" />
+              <xs:element minOccurs="0" name="DataMediumExchangeReportCode" nillable="true" />
+              <xs:element minOccurs="0" name="DataMediumExchangeInstructionCode" nillable="true" />
+              <xs:element minOccurs="0" name="InpaymentSlipWithReferenceNumberSubscriberID" nillable="true" />
+              <xs:element minOccurs="0" name="AlternativePayeePartyInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="AlternativePayeeAllowedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="EqualizationTaxRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="ValueAddedTaxRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="FiscalAddressPartyInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="SupplyingPlantID" nillable="true" />
+              <xs:element minOccurs="0" name="SellerAssortmentProductGroupLevelRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="PlantLevelRelevanceIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="WorkingDayCalendarCode" nillable="true" />
+              <xs:element minOccurs="0" name="CarrierPartyStandardID" nillable="true">
+                <xs:complexType>
+                  <xs:attribute name="schemeAgencyID" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="CarrierPartyFreightGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="ServicePerformerPartyGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="StatisticsGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="TaxAuthorityPartyID" nillable="true" />
+              <xs:element minOccurs="0" name="TaxGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="SocialInsuranceActivityCode" nillable="true" />
+              <xs:element minOccurs="0" name="ForSocialInsuranceRegisteredIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="TaxSplitIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="TaxBasePercentageCode" type="xs:unsignedByte" />
+              <xs:element minOccurs="0" name="ResponsibleTaxOfficePartyInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="RepresentativeName" nillable="true" />
+              <xs:element minOccurs="0" name="BusinessTypeName" nillable="true" />
+              <xs:element minOccurs="0" name="IndustryTypeName" nillable="true" />
+              <xs:element minOccurs="0" name="RelatedCustomerInternalID" nillable="true" />
+              <xs:element minOccurs="0" name="CollectiveNumberingRelevancyIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="StagingDuration" type="xs:unsignedByte" />
+              <xs:element minOccurs="0" name="SchedulingProcedureCode" nillable="true" />
+              <xs:element minOccurs="0" name="TransportationChainCode" nillable="true" />
+              <xs:element minOccurs="0" name="AccountingInformation">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="CompanyID" type="xs:string" />
+                    <xs:element minOccurs="0" name="BlockedIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="DeletedIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="SortCode" nillable="true" />
+                    <xs:element minOccurs="0" name="GeneralLedgerAccountReference">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="ID" type="xs:unsignedInt" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="AuthorisationGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="InterestCalculationInclusionCode" nillable="true" />
+                    <xs:element minOccurs="0" name="InterestCalculationFrequencyCode" type="xs:unsignedByte" />
+                    <xs:element minOccurs="0" name="LastInterestCalculationKeyDate" nillable="true" />
+                    <xs:element minOccurs="0" name="LastInterestCalculationRunDate" nillable="true" />
+                    <xs:element minOccurs="0" name="PaymentMethodsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PaymentBlockCode" nillable="true" />
+                    <xs:element minOccurs="0" name="CashDiscountTermsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="LocalProcessingIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="AccountingClerkInitialsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="DebtorPartyCreditorID" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeResponsiblePartyName" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeResponsiblePartyFaxFormattedNumberDescription" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeResponsiblePartyTelephoneFormattedNumberDescription" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeResponsiblePartyWebAddress" nillable="true" />
+                    <xs:element minOccurs="0" name="Note" nillable="true" />
+                    <xs:element minOccurs="0" name="PlanningGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="HeadOfficeAccountInternalID" nillable="true" />
+                    <xs:element minOccurs="0" name="AlternativePayeePartyInternalID" nillable="true" />
+                    <xs:element minOccurs="0" name="BillOfExchangeLimitAmount" nillable="true">
+                      <xs:complexType>
+                        <xs:attribute name="currencyCode" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="ProbableCheckPaidDuration" type="xs:unsignedByte" />
+                    <xs:element minOccurs="0" name="DoubleEntriesCheckIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="BusinessPartnerToleranceGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="HouseBankInternalID" nillable="true" />
+                    <xs:element minOccurs="0" name="PayItemsSeparatelyIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="WithholdingTaxExemptionCertificateID" nillable="true" />
+                    <xs:element minOccurs="0" name="WithholdingTaxExemptionCertificateValidityDate" nillable="true" />
+                    <xs:element minOccurs="0" name="WithholdingTaxTypeCode" nillable="true">
+                      <xs:complexType>
+                        <xs:attribute name="listID" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="WithholdingTaxExemptionReasonCode" nillable="true">
+                      <xs:complexType>
+                        <xs:attribute name="listID" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="WithholdingTaxCountryCode" nillable="true" />
+                    <xs:element minOccurs="0" name="VendorRecipientTypeCode" nillable="true" />
+                    <xs:element minOccurs="0" name="ReductionRatesDeterminationCode" nillable="true" />
+                    <xs:element minOccurs="0" name="MinorityIndicatorsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PreviousSupplierInternalID" nillable="true" />
+                    <xs:element minOccurs="0" name="EmployeeID" type="xs:unsignedByte" />
+                    <xs:element minOccurs="0" name="PaymentGroupingCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PaymentMethodSupplementCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PaymentAdvicesByEDIIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="ReleaseApprovalGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="InvoiceVerificationToleranceGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="CreditMemosPaymentTermsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PeriodicAccountStatementsCode" nillable="true" />
+                    <xs:element minOccurs="0" name="CertificationDate" nillable="true" />
+                    <xs:element minOccurs="0" name="DeletionBlockedIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="CustomerSupplierClearingIndicator" type="xs:boolean" />
+                    <xs:element minOccurs="0" name="DunningNoticeGroupingCode" nillable="true" />
+                    <xs:element minOccurs="0" name="AssignmentTestGroupCode" nillable="true" />
+                    <xs:element minOccurs="0" name="PrePaymentRelevancyCode" nillable="true" />
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                  <xs:attribute name="dunningInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="withholdingTaxListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="accountingTextListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="accountingInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="procurementCardIssuingInstitutesListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="qualitiyManagementListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="procurementArrangementListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="subRangeListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="supplierTextListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="supplierDocumentListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="propertyListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="propertyValuationCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="AddressInformation">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="UUID" type="xs:string" />
+              <xs:element minOccurs="0" name="MoveDestinationAddressUUID" nillable="true" />
+              <xs:element minOccurs="0" name="MoveDate" nillable="true" />
+              <xs:element minOccurs="0" name="ValidityPeriod">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                    <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="AddressUsage">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="AddressUsageCode" type="xs:string" />
+                    <xs:element minOccurs="0" name="ValidityPeriod">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                          <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="DefaultIndicator" type="xs:boolean" />
+                  </xs:sequence>
+                  <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="CommunicationPreference">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="CorrespondenceLanguageCode" type="xs:string" />
+                          <xs:element minOccurs="0" name="PreferredCommunicationMediumTypeCode" nillable="true" />
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="Email">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="URI" type="xs:string" />
+                          <xs:element minOccurs="0" name="UsageDeniedIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" name="ValidityPeriod">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                                <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs="0" name="TransportNeutralEncapsulationFormatEnabledIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" maxOccurs="unbounded" name="EmailUsage">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element minOccurs="0" name="Usage">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element minOccurs="0" name="Code" type="xs:string" />
+                                      <xs:element minOccurs="0" name="ValidityPeriod">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                                            <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element minOccurs="0" name="DefaultIndicator" type="xs:boolean" />
+                              </xs:sequence>
+                              <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                        <xs:attribute name="eMailNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                        <xs:attribute name="eMailUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="PostalAddress">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="CountryCode" type="xs:string" />
+                          <xs:element minOccurs="0" name="RegionCode" nillable="true" type="xs:string" />
+                          <xs:element minOccurs="0" name="CityName" type="xs:string" />
+                          <xs:element minOccurs="0" name="AdditionalCityName" nillable="true" />
+                          <xs:element minOccurs="0" name="DistrictName" nillable="true" />
+                          <xs:element minOccurs="0" name="StreetPostalCode" type="xs:unsignedShort" />
+                          <xs:element minOccurs="0" name="POBoxPostalCode" nillable="true" />
+                          <xs:element minOccurs="0" name="CompanyPostalCode" nillable="true" />
+                          <xs:element minOccurs="0" name="StreetPrefixName" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalStreetPrefixName" nillable="true" />
+                          <xs:element minOccurs="0" name="StreetName" nillable="true" type="xs:string" />
+                          <xs:element minOccurs="0" name="StreetSuffixName" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalStreetSuffixName" nillable="true" />
+                          <xs:element minOccurs="0" name="HouseID" nillable="true" type="xs:string" />
+                          <xs:element minOccurs="0" name="AdditionalHouseID" nillable="true" />
+                          <xs:element minOccurs="0" name="BuildingID" nillable="true" />
+                          <xs:element minOccurs="0" name="RoomID" nillable="true" />
+                          <xs:element minOccurs="0" name="FloorID" nillable="true" />
+                          <xs:element minOccurs="0" name="CareOfName" nillable="true" />
+                          <xs:element minOccurs="0" name="StreetAddressMailNonDeliveryReasonCode" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxDeviatingCountryCode" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxDeviatingRegionCode" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxDeviatingCityName" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxLobbyName" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxID" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxAddressMailNonDeliveryReasonCode" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxIDVisibleIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" name="POBoxDeliveryServiceID" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxDeliveryServiceTypeCode" nillable="true" />
+                          <xs:element minOccurs="0" name="TaxJurisdictionCode" nillable="true" />
+                          <xs:element minOccurs="0" name="TimeZoneCode" type="xs:string" />
+                          <xs:element minOccurs="0" name="TransportationZoneID" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureElementGroupCode" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureAddressConsistencyStatusCode" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureCityCode" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalRegionalStructureCityCode" nillable="true" />
+                          <xs:element minOccurs="0" name="POBoxDeviatingRegionalStructureCityCode" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureDistrictCode" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureStreetCode" nillable="true" />
+                          <xs:element minOccurs="0" name="ExtendedBuildingID" nillable="true" />
+                          <xs:element minOccurs="0" name="LegacyAddressID" nillable="true" />
+                          <xs:element minOccurs="0" name="CountyName" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureCountyCode" nillable="true" />
+                          <xs:element minOccurs="0" name="TownshipName" nillable="true" />
+                          <xs:element minOccurs="0" name="RegionalStructureTownshipCode" nillable="true" />
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="Telephone">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="Number">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element minOccurs="0" name="SubscriberID" type="xs:unsignedLong" />
+                                <xs:element minOccurs="0" name="ExtensionID" nillable="true" />
+                                <xs:element minOccurs="0" name="CountryCode" type="xs:string" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs="0" name="FormattedNumberDescription" type="xs:long" />
+                          <xs:element minOccurs="0" name="UsageDeniedIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" name="ValidityPeriod">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                                <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs="0" name="MobilePhoneNumberIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" name="SMSEnabledIndicator" type="xs:boolean" />
+                          <xs:element minOccurs="0" maxOccurs="unbounded" name="TelephoneUsage">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element minOccurs="0" name="Usage">
+                                  <xs:complexType>
+                                    <xs:sequence>
+                                      <xs:element minOccurs="0" name="Code" type="xs:string" />
+                                      <xs:element minOccurs="0" name="ValidityPeriod">
+                                        <xs:complexType>
+                                          <xs:sequence>
+                                            <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                                            <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                                          </xs:sequence>
+                                        </xs:complexType>
+                                      </xs:element>
+                                    </xs:sequence>
+                                  </xs:complexType>
+                                </xs:element>
+                                <xs:element minOccurs="0" name="DefaultIndicator" type="xs:boolean" />
+                              </xs:sequence>
+                              <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+                        <xs:attribute name="telephoneNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                        <xs:attribute name="telephoneUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="addressNoteListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="emailListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="facsimileListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="organisationNameListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="personNameListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="postalAddressListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="telephoneListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                  <xs:attribute name="webListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+            <xs:attribute name="addressUsageListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="AddressIndependentCommInfo">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="CommunicationPreference" nillable="true" />
+            </xs:sequence>
+            <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+            <xs:attribute name="emailListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="facsimileListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="telephoneListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+            <xs:attribute name="webListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="Common">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="LocationStandardID">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:unsignedByte">
+                      <xs:attribute name="schemeAgencyID" type="xs:string" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="BusinessPartnerGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="DeletedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="ReleasedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="BlockedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="BusinessPartnerAuthorisationGroupCode" nillable="true" />
+              <xs:element minOccurs="0" name="KeyWordsText" type="xs:string" />
+              <xs:element minOccurs="0" name="AdditionalKeyWordsText" nillable="true" />
+              <xs:element minOccurs="0" name="VerbalCommunicationLanguageCode" nillable="true" />
+              <xs:element minOccurs="0" name="SalutationText" nillable="true" />
+              <xs:element minOccurs="0" name="CorrespondenceBrailleRequiredIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="CorrespondenceLargePrintRequiredIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="NaturalPersonIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="ContactAllowedCode" nillable="true" />
+              <xs:element minOccurs="0" name="LegacyBusinessPartnerID" nillable="true" />
+              <xs:element minOccurs="0" name="DataOriginTypeCode" nillable="true" />
+              <xs:element minOccurs="0" name="Person">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="Name">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="FormOfAddressCode" nillable="true" />
+                          <xs:element minOccurs="0" name="GivenName" nillable="true" />
+                          <xs:element minOccurs="0" name="MiddleName" nillable="true" />
+                          <xs:element minOccurs="0" name="FamilyName" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalFamilyName" nillable="true" />
+                          <xs:element minOccurs="0" name="BirthName" nillable="true" />
+                          <xs:element minOccurs="0" name="NickName" nillable="true" />
+                          <xs:element minOccurs="0" name="InitialsName" nillable="true" />
+                          <xs:element minOccurs="0" name="AcademicTitleCode" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalAcademicTitleCode" nillable="true" />
+                          <xs:element minOccurs="0" name="NamePrefixCode" nillable="true" />
+                          <xs:element minOccurs="0" name="AdditionalNamePrefixCode" nillable="true" />
+                          <xs:element minOccurs="0" name="NameSupplementCode" nillable="true" />
+                          <xs:element minOccurs="0" name="DeviatingFullName" nillable="true" />
+                          <xs:element minOccurs="0" name="NameFormatCountryCode" nillable="true" />
+                          <xs:element minOccurs="0" name="NameFormatCode" nillable="true" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="GenderCode" nillable="true" />
+                    <xs:element minOccurs="0" name="GenderValueCode" nillable="true" />
+                    <xs:element minOccurs="0" name="BirthPlaceName" nillable="true" />
+                    <xs:element minOccurs="0" name="BirthDate" nillable="true" />
+                    <xs:element minOccurs="0" name="BirthdateStatusCode" nillable="true" />
+                    <xs:element minOccurs="0" name="DeathDate" nillable="true" />
+                    <xs:element minOccurs="0" name="MaritalStatusCode" nillable="true" />
+                    <xs:element minOccurs="0" name="NonVerbalCommunicationLanguageCode" nillable="true" />
+                    <xs:element minOccurs="0" name="OccupationCode" nillable="true" />
+                    <xs:element minOccurs="0" name="Employer" nillable="true" />
+                    <xs:element minOccurs="0" name="NationalityCountryCode" nillable="true" />
+                    <xs:element minOccurs="0" name="OriginCountryCode" nillable="true" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="Organisation">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="Name">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element minOccurs="0" name="FormOfAddressCode" type="xs:unsignedByte" />
+                          <xs:element minOccurs="0" name="FirstLineName" type="xs:string" />
+                          <xs:element minOccurs="0" name="SecondLineName" nillable="true" />
+                          <xs:element minOccurs="0" name="ThirdLineName" nillable="true" />
+                          <xs:element minOccurs="0" name="FourthLineName" nillable="true" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element minOccurs="0" name="CompanyLegalFormCode" nillable="true" />
+                    <xs:element minOccurs="0" name="LegalEntityTypeCode" nillable="true" />
+                    <xs:element minOccurs="0" name="FoundationDate" nillable="true" />
+                    <xs:element minOccurs="0" name="LiquidationDate" nillable="true" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="Group">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="FormOfAddressCode" nillable="true" />
+                    <xs:element minOccurs="0" name="Name" nillable="true" />
+                    <xs:element minOccurs="0" name="AdditionalName" nillable="true" />
+                    <xs:element minOccurs="0" name="PartnerGroupTypeCode" nillable="true" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="Role">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="RoleCode" type="xs:string" />
+              <xs:element minOccurs="0" name="ValidityPeriod">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs="0" name="StartDate" type="xs:date" />
+                    <xs:element minOccurs="0" name="EndDate" type="xs:date" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="actionCode" type="xs:unsignedByte" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="CreditManagementCreditWorthiness">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="0" name="AffidavitForAssetsMadeIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="AffidavitForAssetsMadeDate" nillable="true" />
+              <xs:element minOccurs="0" name="BankruptcyProceedingsInitiatedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="BankruptcyProceedingsInitiatedDate" nillable="true" />
+              <xs:element minOccurs="0" name="ForeclosureProceedingsInitiatedIndicator" type="xs:boolean" />
+              <xs:element minOccurs="0" name="ForeclosureProceedingsInitiatedDate" nillable="true" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="changeOrdinalNumberValue" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="reconciliationPeriodCounterValue" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="multipleAssignmentListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="addressInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="addressIndependentInfoCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="bankDetailsListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="paymentCardDetailsCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="commonListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="roleListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="identificationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="industrySectorListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="taxNumberListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="financialServicesCompanyCodeInformationCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="creditManagementCustomInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+      <xs:attribute name="creditManagementExternalCreditInformationListCompleteTransmissionIndicator" type="xs:boolean" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+<xsd:complexType name="BusinessDocumentMessageHeader">
+				<xsd:sequence>
+					<xsd:element name="ID" minOccurs="0" type="BusinessDocumentMessageID"/>
+					<xsd:element name="UUID" minOccurs="0" type="UUID"/>
+					<xsd:element name="ReferenceID" minOccurs="0" type="BusinessDocumentMessageID"/>
+					<xsd:element name="ReferenceUUID" minOccurs="0" type="UUID"/>
+					<xsd:element name="CreationDateTime" type="GLOBAL_DateTime"/>
+					<xsd:element name="TestDataIndicator" minOccurs="0" type="Indicator"/>
+					<xsd:element name="ReconciliationIndicator" minOccurs="0" type="Indicator"/>
+					<xsd:element name="SenderBusinessSystemID" minOccurs="0" type="BusinessSystemID"/>
+					<xsd:element name="RecipientBusinessSystemID" minOccurs="0" type="BusinessSystemID"/>
+					<xsd:element name="SenderParty" minOccurs="0" type="BusinessDocumentMessageHeaderParty"/>
+					<xsd:element name="RecipientParty" minOccurs="0" maxOccurs="unbounded" type="BusinessDocumentMessageHeaderParty"/>
+					<xsd:element name="BusinessScope" minOccurs="0" maxOccurs="unbounded" type="BusinessScope"/>
+				</xsd:sequence>
+			</xsd:complexType>
+

@@ -1,0 +1,8 @@
+#3:
+Hat nur einen Business Partner abgeschickt (bei mehreren im Request Body)
+
+
+#5:
+Mehrere Requests anstatt einer mit Array
+
+

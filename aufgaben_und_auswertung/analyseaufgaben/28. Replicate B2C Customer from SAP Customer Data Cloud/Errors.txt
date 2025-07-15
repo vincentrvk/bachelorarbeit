@@ -1,0 +1,22 @@
+#1: Outbound Request in Richtung MDM hat gefehlt und nur eine Requests bei mehreren Events
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im CPI-Groovy-Skript: No signature of method: org.codehaus.groovy.jsr223.GroovyScriptEngineImpl.setInitialProperties() is applicable for argument types: (com.sap.gateway.ip.core.customdev.processor.MessageImpl) values: [com.sap.gateway.ip.core.customdev.processor.MessageImpl@411d5098]@ line 264 in script3.groovy.
+The MPL ID for the failed message is : AGhT1oS_cpzuNPZWAaQHORnLhhUw
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 229: The current scope already contains a variable of the name uuid
+@ line 229, column 22.
+UUID uuid
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhT1vXz1eNk2oAlpAz6oeWWKId2
+
+
+#5:
+Nur eine Request für mehrere Objekte und letzter Outbound Request fehlt

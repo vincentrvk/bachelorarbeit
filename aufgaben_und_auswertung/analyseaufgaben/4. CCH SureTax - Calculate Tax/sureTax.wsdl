@@ -1,0 +1,2169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="PostRequestBatch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostRequestBatchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PostRequestBatchResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapRequestBatch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requests" type="tns:ArrayOfRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Request" nillable="true" type="tns:Request" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Request">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BusinessUnit" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataMonth" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TotalRevenue" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseGroup" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReturnFileCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="STAN" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="P2PAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipToAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipFromAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderPlacementAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderApprovalAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ItemList" type="tns:ArrayOfItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Address">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="PrimaryAddressLine" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SecondaryAddressLine" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="County" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="State" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PostalCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Plus4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Country" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Geocode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="VerifyAddress" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Item" nillable="true" type="tns:Item" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Item">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InvoiceNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillToNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrigNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TermNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TransDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingPeriodStartDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingPeriodEndDate" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Revenue" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxIncludedCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Units" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="UnitType" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Seconds" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxSitusRule" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxSitusOverrideCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TransTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SalesTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RegulatoryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxExemptionCodeList" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="UDF" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UDF2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FreightOnBoard" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShipFromPOB" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="MailOrder" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CommonCarrier" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="OriginCountryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DestCountryCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="AuxRevenue" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="AuxRevenueType" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="BillingDaysInPeriod" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CostCenter" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GLAccount" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MaterialGroup" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter3" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter5" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter6" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter7" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter8" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter9" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter10" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RuleOverride" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CurrencyCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExemptReasonCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="P2PAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipToAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipFromAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderPlacementAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderApprovalAddress" type="tns:Address" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapRequestBatchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapRequestBatchResult" type="tns:ArrayOfResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Response" nillable="true" type="tns:Response" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Response">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Successful" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HeaderMessage" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ItemMessages" type="tns:ArrayOfItemMessage" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TotalTax" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="STAN" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="GroupList" type="tns:ArrayOfGroup" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfItemMessage">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ItemMessage" nillable="true" type="tns:ItemMessage" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ItemMessage">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfGroup">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Group" nillable="true" type="tns:Group" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Group">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InvoiceNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxList" type="tns:ArrayOfTax" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTax">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Tax" nillable="true" type="tns:Tax" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Tax">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TaxTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxTypeDesc" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAmount" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Revenue" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CountyName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CityName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TaxRate" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="PercentTaxable" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="FeeRate" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="RevenueBase" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxOnTax" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAuthorityID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAuthorityName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Juriscode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="PostRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PostRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapDataExchangeRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:Request" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapDataExchangeRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapDataExchangeRequestResult" type="tns:Request" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:Request" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapRequestResult" type="tns:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FinalizePostRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestFinalize" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FinalizePostRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="FinalizePostRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="FinalizeSoapRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestFinalize" type="tns:FinalizeRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FinalizeRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="FinalizeSoapRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="FinalizeSoapRequestResult" type="tns:FinalizeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FinalizeResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Successful" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HeaderMessage" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ReturnPostRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestReturn" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReturnPostRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReturnPostRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReturnSoapRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestReturn" type="tns:ReturnRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ReturnRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="TransactionType" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Shipping" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Handling" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Revenue" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReturnLineNumberList" type="tns:ArrayOfReturnLineNumber" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfReturnLineNumber">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ReturnLineNumber" nillable="true" type="tns:ReturnLineNumber" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ReturnLineNumber">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Units" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Revenue" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ReturnSoapRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReturnSoapRequestResult" type="tns:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostTaxAdjustmentRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostTaxAdjustmentRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PostTaxAdjustmentRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostTaxAdjustmentWithReturnFileCodeRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="PostTaxAdjustmentWithReturnFileCodeRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="PostTaxAdjustmentWithReturnFileCodeRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapTaxAdjustmentRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TaxAdjustmentRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TaxAdjustmentRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BusinessUnit" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseGroup" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="STAN" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="P2PAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipToAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipFromAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderPlacementAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderApprovalAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAdjustmentItemList" type="tns:ArrayOfTaxAdjustmentItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTaxAdjustmentItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TaxAdjustmentItem" nillable="true" type="tns:TaxAdjustmentItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TaxAdjustmentItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="LineNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="InvoiceNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillToNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrigNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TermNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TransDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingPeriodStartDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingPeriodEndDate" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Revenue" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Tax" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Units" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="UnitType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxSitusRule" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxSitusOverrideCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TransTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SalesTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RegulatoryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxExemptionCodeList" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="UDF" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UDF2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FreightOnBoard" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ShipFromPOB" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="MailOrder" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CommonCarrier" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="OriginCountryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DestCountryCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="BillingDaysInPeriod" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CostCenter" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GLAccount" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MaterialGroup" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter3" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter5" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter6" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter7" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter8" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter9" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Parameter10" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RuleOverride" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CurrencyCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExemptReasonCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="P2PAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipToAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipFromAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderPlacementAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderApprovalAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAdjustmentTaxList" type="tns:ArrayOfTaxAdjustmentTax" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfTaxAdjustmentTax">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TaxAdjustmentTax" nillable="true" type="tns:TaxAdjustmentTax" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TaxAdjustmentTax">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TaxTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxCatCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAuthorityID" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TaxAmount" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="TaxRate" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapTaxAdjustmentRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapTaxAdjustmentRequestResult" type="tns:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapTaxAdjustmentWithReturnFileCodeRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TaxAdjustmentWithReturnFileCodeRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TaxAdjustmentWithReturnFileCodeRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="BusinessUnit" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CmplDataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseGroup" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReturnFileCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="STAN" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="BillingAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="P2PAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipToAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="ShipFromAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderPlacementAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="OrderApprovalAddress" type="tns:Address" />
+          <s:element minOccurs="0" maxOccurs="1" name="TaxAdjustmentItemList" type="tns:ArrayOfTaxAdjustmentItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapTaxAdjustmentWithReturnFileCodeRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapTaxAdjustmentWithReturnFileCodeRequestResult" type="tns:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestBatch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestBatchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelPostRequestBatchResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequestBatch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cancelRequests" type="tns:ArrayOfCancelRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfCancelRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CancelRequest" nillable="true" type="tns:CancelRequest" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CancelRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransId" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CancelSoapRequestBatchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelSoapRequestBatchResult" type="tns:ArrayOfCancelResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfCancelResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CancelResponse" nillable="true" type="tns:CancelResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CancelResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Successful" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HeaderMessage" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransId" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CancelPostRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelPostRequestResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequest">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancel" type="tns:CancelRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequestResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelSoapRequestResult" type="tns:CancelResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithInvoice">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancelWithInvoice" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithInvoiceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelPostRequestWithInvoiceResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequestWithInvoice">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancelWithInvoice" type="tns:CancelRequestWithInvoice" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CancelRequestWithInvoice">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransId" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="InvoiceNumber" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CancelSoapRequestWithInvoiceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelSoapRequestWithInvoiceResult" type="tns:CancelResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithSTAN">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithSTANResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelPostRequestWithSTANResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequestWithSTAN">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancelWithSTAN" type="tns:CancelRequestWithSTAN" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CancelRequestWithSTAN">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="STAN" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CancelSoapRequestWithSTANResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelSoapRequestWithSTANResult" type="tns:CancelResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithMasterTransId">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancel" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelPostRequestWithMasterTransIdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelPostRequestWithMasterTransIdResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CancelSoapRequestWithMasterTransId">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="requestCancelWithMasterTransId" type="tns:CancelRequestWithMasterTransId" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CancelRequestWithMasterTransId">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClientTracking" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="MasterTransId" type="s:long" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CancelSoapRequestWithMasterTransIdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CancelSoapRequestWithMasterTransIdResult" type="tns:CancelResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="HealthMonitor">
+        <s:complexType />
+      </s:element>
+      <s:element name="HealthMonitorResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HealthMonitorResult" type="tns:Response" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetActiveEngines">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ActiveEngines" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetActiveEnginesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SetActiveEnginesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetActiveEngines">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetActiveEnginesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetActiveEnginesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGeocodes">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Zipcode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Plus4" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CountryCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="County" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="AddressLine1" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="AddressLine2" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGeocodesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGeocodesResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GeocodeResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Geocode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Zipcode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Plus4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CountryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="County" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AddressLine1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AddressLine2" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="BatchGetGeocode">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:ArrayOfBatchGetGeocode" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfBatchGetGeocode">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="BatchGetGeocode" nillable="true" type="tns:BatchGetGeocode" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="BatchGetGeocode">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationList" type="tns:ArrayOfLocation" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfLocation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Location" nillable="true" type="tns:Location" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Location">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="SequenceNum" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Zipcode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Plus4" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CountryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="County" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AddressLine1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AddressLine2" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GeocodeBatchResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Geocode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SequenceNum" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorMessage" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfGeocodeBatchResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GeocodeBatchResponse" nillable="true" type="tns:GeocodeBatchResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="BatchGetGeocodeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BatchGetGeocodeResult" type="tns:ArrayOfGeocodeBatchResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGeocodeByZipcode">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Zipcode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Plus4" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetGeocodeResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExtensionData" type="tns:ExtensionDataObject" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponseCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Geocode" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ExtensionDataObject" />
+      <s:element name="GetGeocodeByZipcodeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGeocodeByZipcodeResult" type="tns:GetGeocodeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGeocodeByAddress">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DataYear" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DataMonth" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CountryCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="StateCode" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="County" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGeocodeByAddressResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetGeocodeByAddressResult" type="tns:GetGeocodeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllGeocodes">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ClientNumber" type="s:string" />
+			<s:element minOccurs="0" maxOccurs="1" name="ValidationKey" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllGeocodesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllGeocodesResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="Response" nillable="true" type="tns:Response" />
+      <s:element name="anyType" nillable="true" />
+      <s:element name="GetGeocodeResponse" nillable="true" type="tns:GetGeocodeResponse" />
+      <s:element name="ArrayOfString" nillable="true" type="tns:ArrayOfString" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="PostRequestBatchSoapIn">
+    <wsdl:part name="parameters" element="tns:PostRequestBatch" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestBatchSoapOut">
+    <wsdl:part name="parameters" element="tns:PostRequestBatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapRequestBatchSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapRequestBatch" />
+  </wsdl:message>
+  <wsdl:message name="SoapRequestBatchSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapRequestBatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:PostRequest" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:PostRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapDataExchangeRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapDataExchangeRequest" />
+  </wsdl:message>
+  <wsdl:message name="SoapDataExchangeRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapDataExchangeRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapRequest" />
+  </wsdl:message>
+  <wsdl:message name="SoapRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="FinalizePostRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:FinalizePostRequest" />
+  </wsdl:message>
+  <wsdl:message name="FinalizePostRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:FinalizePostRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="FinalizeSoapRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:FinalizeSoapRequest" />
+  </wsdl:message>
+  <wsdl:message name="FinalizeSoapRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:FinalizeSoapRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReturnPostRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:ReturnPostRequest" />
+  </wsdl:message>
+  <wsdl:message name="ReturnPostRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:ReturnPostRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReturnSoapRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:ReturnSoapRequest" />
+  </wsdl:message>
+  <wsdl:message name="ReturnSoapRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:ReturnSoapRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:PostTaxAdjustmentRequest" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:PostTaxAdjustmentRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentWithReturnFileCodeRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:PostTaxAdjustmentWithReturnFileCodeRequest" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentWithReturnFileCodeRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:PostTaxAdjustmentWithReturnFileCodeRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapTaxAdjustmentRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapTaxAdjustmentRequest" />
+  </wsdl:message>
+  <wsdl:message name="SoapTaxAdjustmentRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapTaxAdjustmentRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapTaxAdjustmentWithReturnFileCodeRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapTaxAdjustmentWithReturnFileCodeRequest" />
+  </wsdl:message>
+  <wsdl:message name="SoapTaxAdjustmentWithReturnFileCodeRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapTaxAdjustmentWithReturnFileCodeRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestBatchSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestBatch" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestBatchSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestBatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestBatchSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestBatch" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestBatchSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestBatchResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelPostRequest" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequest" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithInvoiceSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithInvoice" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithInvoiceSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithInvoiceResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithInvoiceSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithInvoice" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithInvoiceSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithInvoiceResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithSTANSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithSTAN" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithSTANSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithSTANResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithSTANSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithSTAN" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithSTANSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithSTANResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithMasterTransIdSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithMasterTransId" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithMasterTransIdSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelPostRequestWithMasterTransIdResponse" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithMasterTransIdSoapIn">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithMasterTransId" />
+  </wsdl:message>
+  <wsdl:message name="CancelSoapRequestWithMasterTransIdSoapOut">
+    <wsdl:part name="parameters" element="tns:CancelSoapRequestWithMasterTransIdResponse" />
+  </wsdl:message>
+  <wsdl:message name="HealthMonitorSoapIn">
+    <wsdl:part name="parameters" element="tns:HealthMonitor" />
+  </wsdl:message>
+  <wsdl:message name="HealthMonitorSoapOut">
+    <wsdl:part name="parameters" element="tns:HealthMonitorResponse" />
+  </wsdl:message>
+  <wsdl:message name="SetActiveEnginesSoapIn">
+    <wsdl:part name="parameters" element="tns:SetActiveEngines" />
+  </wsdl:message>
+  <wsdl:message name="SetActiveEnginesSoapOut">
+    <wsdl:part name="parameters" element="tns:SetActiveEnginesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveEnginesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetActiveEngines" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveEnginesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetActiveEnginesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGeocodes" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGeocodesResponse" />
+  </wsdl:message>
+  <wsdl:message name="BatchGetGeocodeSoapIn">
+    <wsdl:part name="parameters" element="tns:BatchGetGeocode" />
+  </wsdl:message>
+  <wsdl:message name="BatchGetGeocodeSoapOut">
+    <wsdl:part name="parameters" element="tns:BatchGetGeocodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByZipcodeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGeocodeByZipcode" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByZipcodeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGeocodeByZipcodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByAddressSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGeocodeByAddress" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByAddressSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGeocodeByAddressResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllGeocodesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllGeocodes" />
+  </wsdl:message>
+  <wsdl:message name="GetAllGeocodesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllGeocodesResponse" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestBatchHttpPostIn">
+    <wsdl:part name="request" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestBatchHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestHttpPostIn">
+    <wsdl:part name="request" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PostRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="FinalizePostRequestHttpPostIn">
+    <wsdl:part name="requestFinalize" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="FinalizePostRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ReturnPostRequestHttpPostIn">
+    <wsdl:part name="requestReturn" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="ReturnPostRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentRequestHttpPostIn">
+    <wsdl:part name="request" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentWithReturnFileCodeRequestHttpPostIn">
+    <wsdl:part name="request" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="PostTaxAdjustmentWithReturnFileCodeRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestBatchHttpPostIn">
+    <wsdl:part name="requestCancel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestBatchHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestHttpPostIn">
+    <wsdl:part name="requestCancel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithInvoiceHttpPostIn">
+    <wsdl:part name="requestCancelWithInvoice" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithInvoiceHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithSTANHttpPostIn">
+    <wsdl:part name="requestCancel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithSTANHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithMasterTransIdHttpPostIn">
+    <wsdl:part name="requestCancel" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CancelPostRequestWithMasterTransIdHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="HealthMonitorHttpPostIn" />
+  <wsdl:message name="HealthMonitorHttpPostOut">
+    <wsdl:part name="Body" element="tns:Response" />
+  </wsdl:message>
+  <wsdl:message name="SetActiveEnginesHttpPostIn">
+    <wsdl:part name="ClientNumber" type="s:string" />
+    <wsdl:part name="ValidationKey" type="s:string" />
+    <wsdl:part name="ActiveEngines" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SetActiveEnginesHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveEnginesHttpPostIn" />
+  <wsdl:message name="GetActiveEnginesHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodesHttpPostIn">
+    <wsdl:part name="DataYear" type="s:string" />
+    <wsdl:part name="DataMonth" type="s:string" />
+    <wsdl:part name="Zipcode" type="s:string" />
+    <wsdl:part name="Plus4" type="s:string" />
+    <wsdl:part name="CountryCode" type="s:string" />
+    <wsdl:part name="StateCode" type="s:string" />
+    <wsdl:part name="County" type="s:string" />
+    <wsdl:part name="City" type="s:string" />
+    <wsdl:part name="AddressLine1" type="s:string" />
+    <wsdl:part name="AddressLine2" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodesHttpPostOut">
+    <wsdl:part name="Body" element="tns:anyType" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByZipcodeHttpPostIn">
+    <wsdl:part name="DataYear" type="s:string" />
+    <wsdl:part name="DataMonth" type="s:string" />
+    <wsdl:part name="Zipcode" type="s:string" />
+    <wsdl:part name="Plus4" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByZipcodeHttpPostOut">
+    <wsdl:part name="Body" element="tns:GetGeocodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByAddressHttpPostIn">
+    <wsdl:part name="DataYear" type="s:string" />
+    <wsdl:part name="DataMonth" type="s:string" />
+    <wsdl:part name="CountryCode" type="s:string" />
+    <wsdl:part name="StateCode" type="s:string" />
+    <wsdl:part name="County" type="s:string" />
+    <wsdl:part name="City" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGeocodeByAddressHttpPostOut">
+    <wsdl:part name="Body" element="tns:GetGeocodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllGeocodesHttpPostIn" />
+  <wsdl:message name="GetAllGeocodesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfString" />
+  </wsdl:message>
+  <wsdl:portType name="SureTaxSoap">
+    <wsdl:operation name="PostRequestBatch">
+      <wsdl:input message="tns:PostRequestBatchSoapIn" />
+      <wsdl:output message="tns:PostRequestBatchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequestBatch">
+      <wsdl:input message="tns:SoapRequestBatchSoapIn" />
+      <wsdl:output message="tns:SoapRequestBatchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostRequest">
+      <wsdl:input message="tns:PostRequestSoapIn" />
+      <wsdl:output message="tns:PostRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapDataExchangeRequest">
+      <wsdl:input message="tns:SoapDataExchangeRequestSoapIn" />
+      <wsdl:output message="tns:SoapDataExchangeRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequest">
+      <wsdl:input message="tns:SoapRequestSoapIn" />
+      <wsdl:output message="tns:SoapRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FinalizePostRequest">
+      <wsdl:input message="tns:FinalizePostRequestSoapIn" />
+      <wsdl:output message="tns:FinalizePostRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FinalizeSoapRequest">
+      <wsdl:input message="tns:FinalizeSoapRequestSoapIn" />
+      <wsdl:output message="tns:FinalizeSoapRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReturnPostRequest">
+      <wsdl:input message="tns:ReturnPostRequestSoapIn" />
+      <wsdl:output message="tns:ReturnPostRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReturnSoapRequest">
+      <wsdl:input message="tns:ReturnSoapRequestSoapIn" />
+      <wsdl:output message="tns:ReturnSoapRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentRequest">
+      <wsdl:input message="tns:PostTaxAdjustmentRequestSoapIn" />
+      <wsdl:output message="tns:PostTaxAdjustmentRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentWithReturnFileCodeRequest">
+      <wsdl:input message="tns:PostTaxAdjustmentWithReturnFileCodeRequestSoapIn" />
+      <wsdl:output message="tns:PostTaxAdjustmentWithReturnFileCodeRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentRequest">
+      <wsdl:input message="tns:SoapTaxAdjustmentRequestSoapIn" />
+      <wsdl:output message="tns:SoapTaxAdjustmentRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentWithReturnFileCodeRequest">
+      <wsdl:input message="tns:SoapTaxAdjustmentWithReturnFileCodeRequestSoapIn" />
+      <wsdl:output message="tns:SoapTaxAdjustmentWithReturnFileCodeRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestBatch">
+      <wsdl:input message="tns:CancelPostRequestBatchSoapIn" />
+      <wsdl:output message="tns:CancelPostRequestBatchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestBatch">
+      <wsdl:input message="tns:CancelSoapRequestBatchSoapIn" />
+      <wsdl:output message="tns:CancelSoapRequestBatchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequest">
+      <wsdl:input message="tns:CancelPostRequestSoapIn" />
+      <wsdl:output message="tns:CancelPostRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequest">
+      <wsdl:input message="tns:CancelSoapRequestSoapIn" />
+      <wsdl:output message="tns:CancelSoapRequestSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithInvoice">
+      <wsdl:input message="tns:CancelPostRequestWithInvoiceSoapIn" />
+      <wsdl:output message="tns:CancelPostRequestWithInvoiceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithInvoice">
+      <wsdl:input message="tns:CancelSoapRequestWithInvoiceSoapIn" />
+      <wsdl:output message="tns:CancelSoapRequestWithInvoiceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithSTAN">
+      <wsdl:input message="tns:CancelPostRequestWithSTANSoapIn" />
+      <wsdl:output message="tns:CancelPostRequestWithSTANSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithSTAN">
+      <wsdl:input message="tns:CancelSoapRequestWithSTANSoapIn" />
+      <wsdl:output message="tns:CancelSoapRequestWithSTANSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithMasterTransId">
+      <wsdl:input message="tns:CancelPostRequestWithMasterTransIdSoapIn" />
+      <wsdl:output message="tns:CancelPostRequestWithMasterTransIdSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithMasterTransId">
+      <wsdl:input message="tns:CancelSoapRequestWithMasterTransIdSoapIn" />
+      <wsdl:output message="tns:CancelSoapRequestWithMasterTransIdSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="HealthMonitor">
+      <wsdl:input message="tns:HealthMonitorSoapIn" />
+      <wsdl:output message="tns:HealthMonitorSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetActiveEngines">
+      <wsdl:input message="tns:SetActiveEnginesSoapIn" />
+      <wsdl:output message="tns:SetActiveEnginesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetActiveEngines">
+      <wsdl:input message="tns:GetActiveEnginesSoapIn" />
+      <wsdl:output message="tns:GetActiveEnginesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodes">
+      <wsdl:input message="tns:GetGeocodesSoapIn" />
+      <wsdl:output message="tns:GetGeocodesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BatchGetGeocode">
+      <wsdl:input message="tns:BatchGetGeocodeSoapIn" />
+      <wsdl:output message="tns:BatchGetGeocodeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByZipcode">
+      <wsdl:input message="tns:GetGeocodeByZipcodeSoapIn" />
+      <wsdl:output message="tns:GetGeocodeByZipcodeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByAddress">
+      <wsdl:input message="tns:GetGeocodeByAddressSoapIn" />
+      <wsdl:output message="tns:GetGeocodeByAddressSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllGeocodes">
+      <wsdl:input message="tns:GetAllGeocodesSoapIn" />
+      <wsdl:output message="tns:GetAllGeocodesSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="SureTaxHttpPost">
+    <wsdl:operation name="PostRequestBatch">
+      <wsdl:input message="tns:PostRequestBatchHttpPostIn" />
+      <wsdl:output message="tns:PostRequestBatchHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostRequest">
+      <wsdl:input message="tns:PostRequestHttpPostIn" />
+      <wsdl:output message="tns:PostRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="FinalizePostRequest">
+      <wsdl:input message="tns:FinalizePostRequestHttpPostIn" />
+      <wsdl:output message="tns:FinalizePostRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReturnPostRequest">
+      <wsdl:input message="tns:ReturnPostRequestHttpPostIn" />
+      <wsdl:output message="tns:ReturnPostRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentRequest">
+      <wsdl:input message="tns:PostTaxAdjustmentRequestHttpPostIn" />
+      <wsdl:output message="tns:PostTaxAdjustmentRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentWithReturnFileCodeRequest">
+      <wsdl:input message="tns:PostTaxAdjustmentWithReturnFileCodeRequestHttpPostIn" />
+      <wsdl:output message="tns:PostTaxAdjustmentWithReturnFileCodeRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestBatch">
+      <wsdl:input message="tns:CancelPostRequestBatchHttpPostIn" />
+      <wsdl:output message="tns:CancelPostRequestBatchHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequest">
+      <wsdl:input message="tns:CancelPostRequestHttpPostIn" />
+      <wsdl:output message="tns:CancelPostRequestHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithInvoice">
+      <wsdl:input message="tns:CancelPostRequestWithInvoiceHttpPostIn" />
+      <wsdl:output message="tns:CancelPostRequestWithInvoiceHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithSTAN">
+      <wsdl:input message="tns:CancelPostRequestWithSTANHttpPostIn" />
+      <wsdl:output message="tns:CancelPostRequestWithSTANHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithMasterTransId">
+      <wsdl:input message="tns:CancelPostRequestWithMasterTransIdHttpPostIn" />
+      <wsdl:output message="tns:CancelPostRequestWithMasterTransIdHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="HealthMonitor">
+      <wsdl:input message="tns:HealthMonitorHttpPostIn" />
+      <wsdl:output message="tns:HealthMonitorHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetActiveEngines">
+      <wsdl:input message="tns:SetActiveEnginesHttpPostIn" />
+      <wsdl:output message="tns:SetActiveEnginesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetActiveEngines">
+      <wsdl:input message="tns:GetActiveEnginesHttpPostIn" />
+      <wsdl:output message="tns:GetActiveEnginesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodes">
+      <wsdl:input message="tns:GetGeocodesHttpPostIn" />
+      <wsdl:output message="tns:GetGeocodesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByZipcode">
+      <wsdl:input message="tns:GetGeocodeByZipcodeHttpPostIn" />
+      <wsdl:output message="tns:GetGeocodeByZipcodeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByAddress">
+      <wsdl:input message="tns:GetGeocodeByAddressHttpPostIn" />
+      <wsdl:output message="tns:GetGeocodeByAddressHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllGeocodes">
+      <wsdl:input message="tns:GetAllGeocodesHttpPostIn" />
+      <wsdl:output message="tns:GetAllGeocodesHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SureTaxSoap" type="tns:SureTaxSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PostRequestBatch">
+      <soap:operation soapAction="http://tempuri.org/PostRequestBatch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequestBatch">
+      <soap:operation soapAction="http://tempuri.org/SoapRequestBatch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostRequest">
+      <soap:operation soapAction="http://tempuri.org/PostRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapDataExchangeRequest">
+      <soap:operation soapAction="http://tempuri.org/SoapDataExchangeRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequest">
+      <soap:operation soapAction="http://tempuri.org/SoapRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FinalizePostRequest">
+      <soap:operation soapAction="http://tempuri.org/FinalizePostRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FinalizeSoapRequest">
+      <soap:operation soapAction="http://tempuri.org/FinalizeSoapRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReturnPostRequest">
+      <soap:operation soapAction="http://tempuri.org/ReturnPostRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReturnSoapRequest">
+      <soap:operation soapAction="http://tempuri.org/ReturnSoapRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentRequest">
+      <soap:operation soapAction="http://tempuri.org/PostTaxAdjustmentRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentWithReturnFileCodeRequest">
+      <soap:operation soapAction="http://tempuri.org/PostTaxAdjustmentWithReturnFileCodeRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentRequest">
+      <soap:operation soapAction="http://tempuri.org/SoapTaxAdjustmentRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentWithReturnFileCodeRequest">
+      <soap:operation soapAction="http://tempuri.org/SoapTaxAdjustmentWithReturnFileCodeRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestBatch">
+      <soap:operation soapAction="http://tempuri.org/CancelPostRequestBatch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestBatch">
+      <soap:operation soapAction="http://tempuri.org/CancelSoapRequestBatch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequest">
+      <soap:operation soapAction="http://tempuri.org/CancelPostRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequest">
+      <soap:operation soapAction="http://tempuri.org/CancelSoapRequest" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithInvoice">
+      <soap:operation soapAction="http://tempuri.org/CancelPostRequestWithInvoice" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithInvoice">
+      <soap:operation soapAction="http://tempuri.org/CancelSoapRequestWithInvoice" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithSTAN">
+      <soap:operation soapAction="http://tempuri.org/CancelPostRequestWithSTAN" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithSTAN">
+      <soap:operation soapAction="http://tempuri.org/CancelSoapRequestWithSTAN" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithMasterTransId">
+      <soap:operation soapAction="http://tempuri.org/CancelPostRequestWithMasterTransId" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithMasterTransId">
+      <soap:operation soapAction="http://tempuri.org/CancelSoapRequestWithMasterTransId" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="HealthMonitor">
+      <soap:operation soapAction="http://tempuri.org/HealthMonitor" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetActiveEngines">
+      <soap:operation soapAction="http://tempuri.org/SetActiveEngines" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetActiveEngines">
+      <soap:operation soapAction="http://tempuri.org/GetActiveEngines" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodes">
+      <soap:operation soapAction="http://tempuri.org/GetGeocodes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchGetGeocode">
+      <soap:operation soapAction="http://tempuri.org/BatchGetGeocode" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByZipcode">
+      <soap:operation soapAction="http://tempuri.org/GetGeocodeByZipcode" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByAddress">
+      <soap:operation soapAction="http://tempuri.org/GetGeocodeByAddress" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllGeocodes">
+      <soap:operation soapAction="http://tempuri.org/GetAllGeocodes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="SureTaxSoap12" type="tns:SureTaxSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PostRequestBatch">
+      <soap12:operation soapAction="http://tempuri.org/PostRequestBatch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequestBatch">
+      <soap12:operation soapAction="http://tempuri.org/SoapRequestBatch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostRequest">
+      <soap12:operation soapAction="http://tempuri.org/PostRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapDataExchangeRequest">
+      <soap12:operation soapAction="http://tempuri.org/SoapDataExchangeRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapRequest">
+      <soap12:operation soapAction="http://tempuri.org/SoapRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FinalizePostRequest">
+      <soap12:operation soapAction="http://tempuri.org/FinalizePostRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FinalizeSoapRequest">
+      <soap12:operation soapAction="http://tempuri.org/FinalizeSoapRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReturnPostRequest">
+      <soap12:operation soapAction="http://tempuri.org/ReturnPostRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReturnSoapRequest">
+      <soap12:operation soapAction="http://tempuri.org/ReturnSoapRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentRequest">
+      <soap12:operation soapAction="http://tempuri.org/PostTaxAdjustmentRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentWithReturnFileCodeRequest">
+      <soap12:operation soapAction="http://tempuri.org/PostTaxAdjustmentWithReturnFileCodeRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentRequest">
+      <soap12:operation soapAction="http://tempuri.org/SoapTaxAdjustmentRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapTaxAdjustmentWithReturnFileCodeRequest">
+      <soap12:operation soapAction="http://tempuri.org/SoapTaxAdjustmentWithReturnFileCodeRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestBatch">
+      <soap12:operation soapAction="http://tempuri.org/CancelPostRequestBatch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestBatch">
+      <soap12:operation soapAction="http://tempuri.org/CancelSoapRequestBatch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequest">
+      <soap12:operation soapAction="http://tempuri.org/CancelPostRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequest">
+      <soap12:operation soapAction="http://tempuri.org/CancelSoapRequest" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithInvoice">
+      <soap12:operation soapAction="http://tempuri.org/CancelPostRequestWithInvoice" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithInvoice">
+      <soap12:operation soapAction="http://tempuri.org/CancelSoapRequestWithInvoice" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithSTAN">
+      <soap12:operation soapAction="http://tempuri.org/CancelPostRequestWithSTAN" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithSTAN">
+      <soap12:operation soapAction="http://tempuri.org/CancelSoapRequestWithSTAN" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithMasterTransId">
+      <soap12:operation soapAction="http://tempuri.org/CancelPostRequestWithMasterTransId" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelSoapRequestWithMasterTransId">
+      <soap12:operation soapAction="http://tempuri.org/CancelSoapRequestWithMasterTransId" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="HealthMonitor">
+      <soap12:operation soapAction="http://tempuri.org/HealthMonitor" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetActiveEngines">
+      <soap12:operation soapAction="http://tempuri.org/SetActiveEngines" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetActiveEngines">
+      <soap12:operation soapAction="http://tempuri.org/GetActiveEngines" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodes">
+      <soap12:operation soapAction="http://tempuri.org/GetGeocodes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchGetGeocode">
+      <soap12:operation soapAction="http://tempuri.org/BatchGetGeocode" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByZipcode">
+      <soap12:operation soapAction="http://tempuri.org/GetGeocodeByZipcode" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByAddress">
+      <soap12:operation soapAction="http://tempuri.org/GetGeocodeByAddress" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllGeocodes">
+      <soap12:operation soapAction="http://tempuri.org/GetAllGeocodes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="SureTaxHttpPost" type="tns:SureTaxHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="PostRequestBatch">
+      <http:operation location="/PostRequestBatch" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostRequest">
+      <http:operation location="/PostRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FinalizePostRequest">
+      <http:operation location="/FinalizePostRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReturnPostRequest">
+      <http:operation location="/ReturnPostRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentRequest">
+      <http:operation location="/PostTaxAdjustmentRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PostTaxAdjustmentWithReturnFileCodeRequest">
+      <http:operation location="/PostTaxAdjustmentWithReturnFileCodeRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestBatch">
+      <http:operation location="/CancelPostRequestBatch" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequest">
+      <http:operation location="/CancelPostRequest" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithInvoice">
+      <http:operation location="/CancelPostRequestWithInvoice" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithSTAN">
+      <http:operation location="/CancelPostRequestWithSTAN" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelPostRequestWithMasterTransId">
+      <http:operation location="/CancelPostRequestWithMasterTransId" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="HealthMonitor">
+      <http:operation location="/HealthMonitor" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetActiveEngines">
+      <http:operation location="/SetActiveEngines" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetActiveEngines">
+      <http:operation location="/GetActiveEngines" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodes">
+      <http:operation location="/GetGeocodes" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByZipcode">
+      <http:operation location="/GetGeocodeByZipcode" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetGeocodeByAddress">
+      <http:operation location="/GetGeocodeByAddress" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllGeocodes">
+      <http:operation location="/GetAllGeocodes" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SureTax">
+    <wsdl:port name="SureTaxSoap" binding="tns:SureTaxSoap">
+      <soap:address location="https://qaapi.taxrating.net/Services/V07/SureTax.asmx" />
+    </wsdl:port>
+    <wsdl:port name="SureTaxSoap12" binding="tns:SureTaxSoap12">
+      <soap12:address location="https://qaapi.taxrating.net/Services/V07/SureTax.asmx" />
+    </wsdl:port>
+    <wsdl:port name="SureTaxHttpPost" binding="tns:SureTaxHttpPost">
+      <http:address location="https://qaapi.taxrating.net/Services/V07/SureTax.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

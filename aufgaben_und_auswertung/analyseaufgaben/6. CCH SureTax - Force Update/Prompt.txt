@@ -1,0 +1,292 @@
+Du sollst ein Skript für die Integration von S/4HANA Cloud und CCH Sure Tax bauen. In dieser Integration soll geupdated werden.
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+sureTaxUsername = 
+sureTaxPassword = 
+sureTaxURL = 
+exchageCurrencyDecimal = /n0:TAX_FORCE_SEND/FORCE_HEADER/CURR_DEC/text()
+exchangeJcdUnifyInd = 
+exchangeTID = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Request "Force Update":
+-----------------
+Adresse: ${property.sureTaxURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping
+
+Response Handling: 
+- Die Antwort muss gemäß den Regeln des Response-Mappings behandelt werden
+
+3. Logging:
+----------------------
+- Folgende Schritte müssen geloggt und als Message-Attachment (als String) angehangen werden:
+	1. Eingehender Payload
+	2. Nach dem Request-Mapping 
+	3. Response Payload
+	4. Nach dem Response-Mapping
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+Validierungsregeln:
+- Property ${property.exchangeJcdUnifyInd} muss vorhanden sein, sonst Fehlermeldung werfen (required)
+- Property ${property.exchangeTID} muss vorhanden sein, sonst Fehlermeldung werfen (required)
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfeld -> Zielfeld
+
+TAX_DATE -> /ns1:SoapTaxAdjustmentWithReturnFileCodeRequest/ns1:request/ns1:DataYear
+Transformationsregel:
+- Das erste TAX_DATE unter allen FORCE_ITEMs 
+- Wenn das Jahr nach dem heutigen Tag liegt, nimm das heutige Datum
+- Nur das Jahr als Zielwert nehmen (z.B. "2025")
+
+
+--- NACHTRÄGLICH RAUSGENOMMEN ---
+TAXAMOV -> /ns1:SoapTaxAdjustmentWithReturnFileCodeRequest/ns1:request/ns1:TaxAdjustmentItemList/ns1:TaxAdjustmentItem/*Tax
+Transformationsregel:
+- String trimmen
+- eventuell vorhandenes Minus voranstellen
+- Wenn null, Ausgabe eines leeren Strings
+
+AMOUNT, FREIGHT_AM, EXEMPT_AMT, CREDIT_IND, CURR_DEC -> /ns1:SoapTaxAdjustmentWithReturnFileCodeRequest/ns1:request/ns1:TaxAdjustmentItemList/ns1:TaxAdjustmentItem/ns1:Revenue
+Transformationsregeln:
+- AMOUNT: eventuell vorhandenes Minus voranstellen
+- FREIGHT_AM: Wenn vorhanden, eventuell vorhandenes Minus voranstellen, ansonsten eine "0"
+- EXEMPT_AMT: Wenn vorhanden, eventuell vorhandenes Minus voranstellen, ansonsten eine "0"
+- CURR_DEC: Anzahl der Dezimalstellen, welche verschoben werden sollen, Berechnung durch 10^CURR_DEC (Skalierungsfaktor)
+- Berechnung Zielwert:
+	1. AMOUNT und FREIGHT_AM werden addiert
+	2. Vom Ergebnis wird EXEMPT_AM abgezogen
+	3. Dieses Ergebnis wird durch CURR_DEC geteilt (Dezimalstellen-Verschiebung)
+	4a. Wenn CREDIT_IND = "0" ist, nimm das Ergebnis aus Punkt 3 als Zielwert
+	4b. Wenn CREDIT_IND ungleich "0" ist, multipliziere das Ergebnis aus Punkt 3 mit "-1"
+	
+TAXAMOV, CURR_DEC -> /ns1:SoapTaxAdjustmentWithReturnFileCodeRequest/ns1:request/ns1:TaxAdjustmentItemList/ns1:TaxAdjustmentItem/ns1:Tax
+Transformationsregel: 
+- CURR_DEC: Anzahl der Dezimalstellen, welche verschoben werden sollen, Berechnung durch 10^CURR_DEC (Skalierungsfaktor)
+- TAXAMOV: eventuell vorhandenes Minus voranstellen
+- Berechnung Zielwert:
+	1. TAXAMOV um berechneten Skalierungsfaktor (CURR_DEC) verschieben
+	2a. Wenn CREDIT_IND = "0" ist, nimm das Ergebnis aus Punkt 1 als Zielwert
+	2b. Wenn CREDIT_IND ungleich "0" ist, multipliziere das Ergebnis aus Punkt 1 mit "-1" 
+	
+TXJCD_POO -> /ns1:SoapTaxAdjustmentWithReturnFileCodeRequest/ns1:request/ns1:TaxAdjustmentItemList/ns1:TaxAdjustmentItem/ns1:OrderPlacementAddress/ns1:Geocode
+Transformationsregel:
+- Wenn ${property.exchangeJcdUnifyInd} = "X" ist, dann
+	- Lasse Zeichen 3 und 4 aus dem Quellfeld aus
+- TXJCD_POO muss genau 12 Zeichen lang sein
+- Wenn nicht genau 12 Zeichen lang, wirf einen Fehler
+- Die ersten 2 Zeichen müssen Buchstaben sein,
+- Die nächsten 5 müssen Zahlen sein,
+- Die letzten 5 können beides sein
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+
+"1.0" -> /ns2:TAX_FORCE_RECEIVE/FORCE_RESULT_HEADER/API_VERSION
+
+${property.exchangeTID} -> /ns2:TAX_FORCE_RECEIVE/FORCE_RESULT_HEADER/TID
+
+"0" -> /ns2:TAX_FORCE_RECEIVE/FORCE_RESULT_HEADER/RETCODE
+
+"0000" -> /ns2:TAX_FORCE_RECEIVE/FORCE_RESULT_HEADER/ERRCODE
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<TAX_FORCE_SEND xmlns="http://sap.com/xi/FotETaxUS">
+  <FORCE_HEADER>
+    <CURR_DEC>002</CURR_DEC>
+  </FORCE_HEADER>
+  <FORCE_ITEM>
+    <TAX_DATE>2024-12-01</TAX_DATE>
+    <TAXAMOV>150.00</TAXAMOV>
+    <AMOUNT>1200.00</AMOUNT>
+    <FREIGHT_AM>50.00</FREIGHT_AM>
+    <EXEMPT_AMT>100.00</EXEMPT_AMT>
+    <CREDIT_IND>X</CREDIT_IND>
+    <TXJCD_POO>TX99912345</TXJCD_POO>
+  </FORCE_ITEM>
+</TAX_FORCE_SEND>
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://sap.com/xi/FotETaxUS"
+           targetNamespace="http://sap.com/xi/FotETaxUS"
+           elementFormDefault="qualified">
+  <xs:element name="TAX_FORCE_SEND">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FORCE_HEADER">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CURR_DEC" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FORCE_ITEM" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TAX_DATE" type="xs:date" minOccurs="0"/>
+              <xs:element name="TAXAMOV" type="xs:string" minOccurs="0"/>
+              <xs:element name="AMOUNT" type="xs:string" minOccurs="0"/>
+              <xs:element name="FREIGHT_AM" type="xs:string" minOccurs="0"/>
+              <xs:element name="EXEMPT_AMT" type="xs:string" minOccurs="0"/>
+              <xs:element name="CREDIT_IND" type="xs:string" minOccurs="0"/>
+              <xs:element name="TXJCD_POO" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:SoapTaxAdjustmentWithReturnFileCodeRequest xmlns:ns1="http://example.namespace/ns1">
+  <ns1:request>
+    <ns1:DataYear>2024</ns1:DataYear>
+    <ns1:TaxAdjustmentItemList>
+      <ns1:TaxAdjustmentItem>
+        <ns1:IncomeTax>1200.50</ns1:IncomeTax>
+        <ns1:Revenue>10000.00</ns1:Revenue>
+        <ns1:Tax>1551.50</ns1:Tax>
+        <ns1:OrderPlacementAddress>
+          <ns1:Geocode>DE123456789</ns1:Geocode>
+        </ns1:OrderPlacementAddress>
+      </ns1:TaxAdjustmentItem>
+      <ns1:TaxAdjustmentItem>
+        <ns1:IncomeTax>900.00</ns1:IncomeTax>
+        <ns1:SalesTax>200.00</ns1:SalesTax>
+        <ns1:OtherTax>30.00</ns1:OtherTax>
+        <ns1:Revenue>8000.00</ns1:Revenue>
+        <ns1:Tax>1130.00</ns1:Tax>
+        <ns1:OrderPlacementAddress>
+          <ns1:Geocode>DE987654321</ns1:Geocode>
+        </ns1:OrderPlacementAddress>
+      </ns1:TaxAdjustmentItem>
+    </ns1:TaxAdjustmentItemList>
+  </ns1:request>
+</ns1:SoapTaxAdjustmentWithReturnFileCodeRequest>
+
+
+
+OUTPUT RESPONSE MAPPING:
+<ns2:TAX_FORCE_RECEIVE xmlns:ns2="http://sap.com/xi/FotETaxUS">
+  <ns2:FORCE_RESULT_HEADER>
+    <ns2:API_VERSION>1.0</ns2:API_VERSION>
+    <ns2:TID>ABC1234567890XYZ</ns2:TID>
+    <ns2:RETCODE>0</ns2:RETCODE>
+    <ns2:ERRCODE>0000</ns2:ERRCODE>
+  </ns2:FORCE_RESULT_HEADER>
+</ns2:TAX_FORCE_RECEIVE>
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns1="http://example.namespace/ns1"
+           targetNamespace="http://example.namespace/ns1"
+           elementFormDefault="qualified">
+  <xs:element name="SoapTaxAdjustmentWithReturnFileCodeRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="request">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="DataYear" type="xs:integer"/>
+              <xs:element name="TaxAdjustmentItemList">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="TaxAdjustmentItem" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="IncomeTax" type="xs:decimal" minOccurs="0"/>
+                          <xs:element name="SalesTax" type="xs:decimal" minOccurs="0"/>
+                          <xs:element name="OtherTax" type="xs:decimal" minOccurs="0"/>
+                          <xs:element name="Revenue" type="xs:decimal"/>
+                          <xs:element name="Tax" type="xs:decimal"/>
+                          <xs:element name="OrderPlacementAddress">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Geocode" type="xs:string"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://sap.com/xi/FotETaxUS"
+    xmlns:ns2="http://sap.com/xi/FotETaxUS"
+    elementFormDefault="qualified">
+  <xsd:element name="TAX_FORCE_RECEIVE" type="ns2:TAX_FORCE_RECEIVE"/>
+  <xsd:complexType name="TAX_FORCE_RECEIVE">
+    <xsd:sequence>
+      <xsd:element name="FORCE_RESULT_HEADER" type="ns2:FORCE_RESULT_HEADER"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="FORCE_RESULT_HEADER">
+    <xsd:sequence>
+      <xsd:element name="API_VERSION" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="TID" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="RETCODE" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="ERRCODE" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

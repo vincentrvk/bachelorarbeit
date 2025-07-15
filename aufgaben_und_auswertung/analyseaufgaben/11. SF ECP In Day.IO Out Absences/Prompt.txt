@@ -1,0 +1,342 @@
+Du sollst ein Skript für die Integration von SAP SuccessFactors Employee Central Payroll erstellen. Es sollen Abwesenheiten aus Day.IO importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+p_operacao = 
+p_externalId = request.absences.externalId
+p_startDate = request.absences.startDate
+p_uniqueId = request.absences.uniqueId
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Logging:
+-----------
+Der Payload vor der Request wird als Attachment als String an das Message Objekt angehangen
+
+
+3. Request "Set Absences":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping (jede absence einzeln)
+
+Response Handling: 
+- Response muss gemäß den Mapping-Anforderungen für das Response-Mapping behandelt werden
+
+
+4. Zusammenfassen der Responses:
+--------------------------------
+Alle gemappten Responses werden zusammengefasst und als ein Objekt zurückgegeben
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Jede request.absence wird einzeln gemappt
+Quellfeld -> Zielfeld
+JSON -> XML
+
+externalId -> /ns1:ZHR_FGRP_0001/P2001/item/PERNR
+
+startDate -> /ns1:ZHR_FGRP_0001/P2001/item/BEGDA
+Transformationsregel:
+- Formatiere das Datum in das Format "yyyy-MM-dd"
+
+startTime -> /ns1:ZHR_FGRP_0001/P2001/item/BEGUZ
+Transformationsregel:
+- Formatiere die Zeit in das Format "HH:mm:ss"
+
+hours -> /ns1:ZHR_FGRP_0001/P2001/item/STDAZ
+
+${property.p_operacao} -> /ns1:ZHR_FGRP_0001/TP_OP
+Transformationsregel:
+- Wenn die Property leer ist oder Placeholder beinhaltet, schreibe als Zielwert "I"
+- Ansonsten übermittle die Property als Zielwert
+
+
+
+RESPONSE-MAPPING:
+Jede Response wird einzeln gemappt
+Quellfeld -> Zielfeld
+JSON -> XML
+
+MENSAGEM -> /response/absences/message
+
+STATUS -> /response/absences/status
+
+${property.p_externalId} -> /response/absences/externalId
+
+${property.p_startDate} -> /response/absences/startDate
+
+${property.p_uniqueId} -> /response/absences/uniqueId
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+{
+  "request": {
+    "operation": "createAbsences",
+    "absences": [
+      {
+        "externalId": "EMP001",
+        "startDate": "2025-06-01",
+        "startTime": "08:00",
+        "hours": "4.5",
+		"uniqueId": "12345"
+      },
+      {
+        "externalId": "EMP002",
+        "startDate": "2025-06-02",
+        "startTime": "09:00",
+        "hours": "8",
+		"uniqueId": "23456"
+      }
+    ]
+  }
+}
+
+
+
+INPUT RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:ZHR_FGRP_0001Response xmlns:ns1="urn:sap-com:document:sap:rfc:functions">
+  <ns1:RETURN>
+    <ns1:item>
+      <ns1:STATUS>S</ns1:STATUS>
+      <ns1:MENSAGEM>Vorgang erfolgreich verarbeitet.</ns1:MENSAGEM>
+    </ns1:item>
+    <ns1:item>
+      <ns1:STATUS>E</ns1:STATUS>
+      <ns1:MENSAGEM>Fehlerhafte Personalnummer.</ns1:MENSAGEM>
+    </ns1:item>
+  </ns1:RETURN>
+</ns1:ZHR_FGRP_0001Response>
+
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AbsenceRequest",
+  "type": "object",
+  "properties": {
+    "request": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string"
+        },
+        "absences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "externalId": {
+                "type": "string"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "startTime": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              },
+              "hours": {
+                "type": "string",
+                "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+              },
+			  "uniqueId": {
+                "type": "string"
+              }
+            },
+            "required": ["externalId", "startDate", "startTime", "hours"]
+          }
+        }
+      },
+      "required": ["operation", "absences"]
+    }
+  },
+  "required": ["request"]
+}
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="urn:sap-com:document:sap:rfc:functions"
+           xmlns="urn:sap-com:document:sap:rfc:functions"
+           elementFormDefault="qualified">
+
+  <xs:simpleType name="char1">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="char220">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="220"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ZHRE_RETURN">
+    <xs:sequence>
+      <xs:element name="STATUS" type="char1"/>
+      <xs:element name="MENSAGEM" type="char220"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ZRETURN_TAB">
+    <xs:sequence>
+      <xs:element name="item" type="ZHRE_RETURN" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="ZHR_FGRP_0001Response">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RETURN" type="ZRETURN_TAB"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ZHR_FGRP_0001 xmlns="urn:sap-com:document:sap:rfc:functions">
+  <P2001>
+    <item>
+      <PERNR>12345678</PERNR>
+      <BEGDA>2024-06-01</BEGDA>
+      <BEGUZ>08:00:00</BEGUZ>
+      <STDAZ>7.50</STDAZ>
+    </item>
+  </P2001>
+  <TP_OP>A</TP_OP>
+</ZHR_FGRP_0001>
+
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+{
+  "response": {
+    "absences": {
+      "externalId": "EMP001",
+      "startDate": "2025-06-01",
+      "uniqueId": "12345",
+      "status": "SUCCESS",
+      "message": "Absence created"
+    }
+  }
+}
+
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="urn:sap-com:document:sap:rfc:functions"
+           targetNamespace="urn:sap-com:document:sap:rfc:functions"
+           elementFormDefault="qualified">
+
+  <xs:element name="ZHR_FGRP_0001">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="P2001" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="PERNR" type="xs:string" minOccurs="0"/>
+                    <xs:element name="BEGDA" type="xs:string" minOccurs="0"/>
+                    <xs:element name="BEGUZ" type="xs:string" minOccurs="0"/>
+                    <xs:element name="STDAZ" type="xs:decimal" minOccurs="0"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TP_OP" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Single Absence Response",
+  "type": "object",
+  "properties": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "absences": {
+          "type": "object",
+          "properties": {
+            "externalId": {
+              "type": "string"
+            },
+            "startDate": {
+              "type": "string"
+            },
+            "uniqueId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    }
+  },
+  "required": ["response"]
+}
+
+

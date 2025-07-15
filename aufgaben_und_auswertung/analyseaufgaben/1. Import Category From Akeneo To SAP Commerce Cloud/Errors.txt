@@ -1,0 +1,17 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: No signature of method: java.lang.String.call() is applicable for argument types: (script1__Script$_mappingCategories_closure6$_closure8$_closure9$_closure10) values: [script1__Script$_mappingCategories_closure6$_closure8$_closure9$_closure10@67c78883]
+Possible solutions: wait(), any(), wait(long), any(groovy.lang.Closure), each(groovy.lang.Closure), take(int)@ line 279 in script1.groovy.
+The MPL ID for the failed message is : AGhJQEsQsY4a0vDfGaYE8E7E-MZw
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Kategorien-Import: No signature of method: com.sap.it.op.agent.mpl.factory.impl.MessageLogImpl.getMessage() is applicable for argument types: () values: []@ line 296 in script1.groovy.
+The MPL ID for the failed message is : AGhJRADRHqsFLoGFNyeKWTZ-urR3
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Akeneo-Import-Skript: No signature of method: org.codehaus.groovy.jsr223.GroovyScriptEngineImpl.handleError() is applicable for argument types: (java.lang.String, groovy.lang.MissingMethodException, com.sap.it.op.agent.mpl.factory.impl.MessageLogImpl) values: [, groovy.lang.MissingMethodException: No signature of method: com.sap.gateway.ip.core.customdev.processor.MessageImpl.getHeader() is applicable for argument types: (java.lang.String) values: [X-PIM-CLIENT-ID]
+Possible solutions: getHeader(java.lang.String, java.lang.Class), getHeaders(), setHeader(java.lang.String, java.lang.Object), setHeaders(java.util.Map), ...]@ line 257 in script2.groovy.
+The MPL ID for the failed message is : AGhJRdtwpVi9EjhRmKVee9T9ZUQR
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Kategorien-Import: No signature of method: com.sap.it.op.agent.mpl.factory.impl.MessageLogImpl.getMessage() is applicable for argument types: () values: []@ line 283 in script4.groovy.
+The MPL ID for the failed message is : AGhJSXQHUT4qcFSYdvJ5VU5FkU_W

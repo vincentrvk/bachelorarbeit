@@ -1,0 +1,27 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 68: unable to resolve class Field , unable to find class for annotation
+@ line 68, column 1.
+@Field static final String PLACEHOLDER = "placeholder"
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhQIuJskhrhI2NJT4rI4OLAiGbf
+
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Mapping-Skript: No signature of method: groovy.util.slurpersupport.NodeChild.normalize() is applicable for argument types: () values: []@ line 257 in script2.groovy.
+The MPL ID for the failed message is : AGhQI1086DzITsreNbR4CVm0fsvh
+
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 138: Method definition not expected here. Please define the method at an appropriate place or perhaps try using a block/Closure instead. at line: 138 column: 9. File: script4__Script.groovy @ line 138, column 9.
+BigDecimal toNumber(String s) {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhQJY2yBSf2Q5wG85hR7OJLLCzs

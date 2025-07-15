@@ -1,0 +1,38 @@
+#1:
+Request Mapping hat nicht funktioniert (transTypeCode Map)
+
+#2:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script2__Script.groovy: 348: Primitive type literal: boolean cannot be used as a method name at line: 348 column: 1. File: script2__Script.groovy @ line 348, column 1.
+boolean String.isInteger() {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhP0P1OaVUAdjHV2e2Jpdr3t_Nn
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 100: unexpected token: : @ line 100, column 49.
+t(BigDecimal.ZERO, BigDecimal::add)
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhP0gf48WDMJs0R9wLyCOJLXs5F
+
+
+#4:
+Request Mapping hat nicht funktioniert (transTypeCode Map)
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script5__Script.groovy: 19: unable to resolve class groovy.xml.XmlSlurper
+@ line 19, column 1.
+import groovy.xml.XmlSlurper
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhP04cCP4S0CT1CH_3uTuK5Jo0j

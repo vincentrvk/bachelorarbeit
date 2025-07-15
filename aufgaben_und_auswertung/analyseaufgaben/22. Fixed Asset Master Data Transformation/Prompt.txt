@@ -1,0 +1,319 @@
+Du sollst ein Skript für die Integration von SAP Business ByDesign und SAP S4/Hana Public Cloud erstellen. Es soll Fixed Asset Master Data Transformation importiert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Decoding:
+-----------
+- Dekodiere den eingehenden Base64-Payload
+
+
+3. Filter:
+------------------
+- Filtere den Payload nach /Workbook/Worksheet
+
+
+4. Struktur:
+------------
+- Der eingehende Payload ist aufgebaut wie eine Tabelle:
+	- Jedes Worksheet hat einen Namen als Attribut (z.B. <Worksheet ss:Name="Fixed_Asset_Master">)
+	- Jedes Worksheet hat 1 Header Zeile mit den Spaltenbezeichnungen (immer die 1. Zeile)
+	- Jedes Worksheet hat 1 Datenzeile (2. Zeile) in der die jeweiligen Daten für die Spalten stehen
+		- In der Reihenfolge der Spaltenbezeichnungen
+- Die Quellfelder im Mapping sind folgendermaßen konfiguriert: /Material/{Name des Worksheets}/{Spalte}
+
+
+5. Mapping:
+-------------------
+- Mappe den Payload gemäß den Mapping-Anforderungen
+
+
+6. Encoding:
+-------------------
+- Kodiere den Payload im Base64-Format
+
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING: 
+Quellfeld -> Zielfeld
+
+/Fixed_Asset_Master/DefaultSetofBook/Company_ID, /Fixed_Asset_Master/DefaultSetofBook/Default_Set_of_Book_ID, /Fixed_Asset_Master/MasterData/Company, /Fixed_Asset_Master/MasterData/Set_of_Books -> /Fixed_Asset/General/BUKRS
+Transformationsregel:
+- Prüfe, ob Company in der Liste der Company_IDs (aus DefaultSetOfBook) vorhanden ist 
+- Wenn ja: prüfe, ob Set_of_Books dem Default_Set_of_Book_ID entspricht, das zur Company_ID gehört
+	- Wenn ja: Gib Company als Zielwert aus
+ 	- Wenn nein: Kein Output, Zeile wird ignoriert
+- Wenn nein: Gib eine Fehlermeldung aus
+
+/Fixed_Asset_Master/DefaultSetofBook/Company_ID, /Fixed_Asset_Master/DefaultSetofBook/Default_Set_of_Book_ID, /Fixed_Asset_Master/MasterData/Company, /Fixed_Asset_Master/MasterData/Set_of_Books, /Fixed_Asset_Master/MasterData/Fixed_Asset -> /Fixed_Asset/General/ANLN1, /Fixed_Asset/General/INVENTORY, /Fixed_Asset/General/ANLN2
+Transformationsregel:
+- Prüfe, ob Company in der Liste der Company_IDs (aus DefaultSetOfBook) vorhanden ist 
+- Wenn ja: prüfe, ob Set_of_Books dem Default_Set_of_Book_ID entspricht, das zur Company_ID gehört
+	- Wenn ja: Gib Fixed_Asset als Zielwert aus
+ 	- Wenn nein: Kein Output, Zeile wird ignoriert
+- Wenn nein: Gib eine Fehlermeldung aus
+	
+/Fixed_Asset_Master/DefaultSetofBook/Company_ID, /Fixed_Asset_Master/DefaultSetofBook/Default_Set_of_Book_ID, /Fixed_Asset_Master/MasterData/Company, /Fixed_Asset_Master/MasterData/Set_of_Books, /Fixed_Asset_Master/MasterData/Fixed_Asset -> /Fixed_Asset/General/ANLKL,
+- Prüfe, ob Company in der Liste der Company_IDs (aus DefaultSetOfBook) vorhanden ist 
+- Wenn ja: prüfe, ob Set_of_Books dem Default_Set_of_Book_ID entspricht, das zur Company_ID gehört
+	- Wenn ja: Gib Fixed_Asset als Zielwert aus
+ 	- Wenn nein: Kein Output, Zeile wird ignoriert
+- Wenn nein: Gib eine Fehlermeldung aus
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+kein Response Mapping
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<Workbook xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="Fixed_Asset_Master">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">Fixed_Asset</Data></Cell>
+        <Cell><Data ss:Type="String">Fixed_Asset_Description</Data></Cell>
+        <Cell><Data ss:Type="String">Fixed_Asset_Class</Data></Cell>
+        <Cell><Data ss:Type="String">Company</Data></Cell>
+        <Cell><Data ss:Type="String">Set_of_Books</Data></Cell>
+        <Cell><Data ss:Type="String">Capitalization_Date</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">FA1001</Data></Cell>
+        <Cell><Data ss:Type="String">High-End Laptop</Data></Cell>
+        <Cell><Data ss:Type="String">1000</Data></Cell>
+        <Cell><Data ss:Type="String">1001</Data></Cell>
+        <Cell><Data ss:Type="String">SOB001</Data></Cell>
+        <Cell><Data ss:Type="String">2024-01-01</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+
+  <Worksheet ss:Name="DefaultSetofBook">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">Company_ID</Data></Cell>
+        <Cell><Data ss:Type="String">Default_Set_of_Book_ID</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">1001</Data></Cell>
+        <Cell><Data ss:Type="String">SOB001</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+</Workbook>
+
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="urn:schemas-microsoft-com:office:spreadsheet"
+    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+  <xs:element name="Workbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Worksheet" maxOccurs="2">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Table">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Row" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:choice minOccurs="1" maxOccurs="6">
+                            <xs:element name="Cell" maxOccurs="unbounded">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="Data">
+                                    <xs:complexType>
+                                      <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                          <xs:attribute ref="ss:Type" use="required"/>
+                                        </xs:extension>
+                                      </xs:simpleContent>
+                                    </xs:complexType>
+                                  </xs:element>
+                                </xs:sequence>
+                              </xs:complexType>
+                            </xs:element>
+                          </xs:choice>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Name" use="required">
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="Fixed_Asset_Master"/>
+                  <xs:enumeration value="DefaultSetofBook"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- Attribute definitions -->
+  <xs:attribute name="Type" type="xs:string"/>
+</xs:schema>
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version='1.0' encoding='utf-8'?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="Fixed_Asset">
+    <Table ss:ExpandedRowCount="11">
+      <Row/>
+      <Row/>
+      <Row/>
+      <Row/>
+      <Row>
+        <Cell><Data ss:Type="String">BUKRS</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">ANLN1</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">INVENTORY</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">ANLN2</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">ANLKL</Data></Cell> <!-- hardcoded -->
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">Company Code</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">Main Asset Number</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">Inventory Number</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">Asset Subnumber</Data></Cell> <!-- hardcoded -->
+        <Cell><Data ss:Type="String">Asset Class</Data></Cell> <!-- hardcoded -->
+      </Row> 
+      <Row/>
+      <Row>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+        <Cell><Data ss:Type="String">Type: String</Data></Cell>
+      </Row>
+      <Row ss:AutoFitHeight="0">
+        <Cell><Data ss:Type="String">1001</Data></Cell>                       
+        <Cell><Data ss:Type="String">000000100001</Data></Cell>              
+        <Cell><Data ss:Type="String">INV-FA1001</Data></Cell>                
+        <Cell><Data ss:Type="String">0000</Data></Cell>                      
+        <Cell><Data ss:Type="String">1000</Data></Cell>                      
+      </Row>
+    </Table>
+  </Worksheet>
+</Workbook>
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:element name="Workbook">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Worksheet" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Table">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Row" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Cell" minOccurs="0" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="Data" minOccurs="0">
+                                  <xs:complexType mixed="true">
+                                    <xs:attribute name="ss:Type" type="xs:string" use="optional"/>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                              <xs:attribute name="ss:Index" type="xs:int" use="optional"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="ss:AutoFitHeight" type="xs:string" use="optional" fixed="0"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="ss:ExpandedColumnCount" type="xs:int" use="optional" fixed="10"/>
+                  <xs:attribute name="ss:ExpandedRowCount" type="xs:int" use="optional" fixed="20"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="ss:Name" type="xs:string" use="required" fixed="Fixed_Asset"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+

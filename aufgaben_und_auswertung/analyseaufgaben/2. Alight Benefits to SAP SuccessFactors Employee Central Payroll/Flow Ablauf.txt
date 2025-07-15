@@ -1,0 +1,59 @@
+Content Modifier:
+Property für Encryption oder nicht
+
+Router 
+a) Encryption
+b) ohne encryption
+
+CSV Header removen
+
+CSV zu XML
+
+Content Modifier
+properties extrahieren:
+-filename
+-zahl an employees
+-zahl an invalid employees (count(/RecordList/Record[ValidityPeriod_StartDate='' or ValidityPeriod_EndDate='' or PayrollID='' or CompenstationComponentTypeID='' or Amount='']))
+
+Mapping
+(eigentlich nur ein Feld modifizieren): 
+def String customFunc(String arg1,String arg2){
+	
+	if(!arg1.matches("[0-9]+"))
+	{
+	    arg2 = "E";
+	}
+	
+	return arg2; 
+}
+Für Zielfeld Record Type (Arg 2=Record_Type; Arg 1=PayrollID)
+XSL: recordList.xsl
+
+Multicast A successful:
+Filter (Posten): /RecordList/Record[ValidityPeriod_StartDate!='' and ValidityPeriod_EndDate!='' and PayrollID!='' and CompenstationComponentTypeID!='' and Amount!='' and (string-length(PayrollID))<9 and Record_Type!='E']
+Subflow Posting:
+---------------
+Content Modifier
+-Body: Tag außenrum: <RecordList>
+Mapping
+Auf XSL: EmployeeBenefitsVendorData_List.xsl
+
+Abschicken (Einzeln oder Split und schicken)
+
+
+---
+
+
+Multicast B insuccessful:
+Filter(incompl): /RecordList/Record[ValidityPeriod_StartDate='' or ValidityPeriod_EndDate='' or PayrollID='' or CompenstationComponentTypeID='' or Amount='' or (string-length(PayrollID))>=9 or Record_Type='E']
+Subflow Insuccessful Posten:
+---------------------------
+Content Modifier
+-Body: Tag außenrum: <RecordList>
+Mapping
+Auf XSL: Validation.xsl
+XML zu CSV
+Abschicken
+
+
+

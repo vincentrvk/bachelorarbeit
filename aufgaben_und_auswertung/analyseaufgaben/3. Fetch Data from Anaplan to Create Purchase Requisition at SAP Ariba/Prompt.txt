@@ -1,0 +1,138 @@
+Du sollst ein Skript für den Import von Purchase Requests von Anaplan zu SAP Ariba bauen. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+SAP_Receiver = "Ariba"
+SAP_Sender = "Anaplan"
+MessageID = Message ID
+aribaURL = 
+aribaUsername = 
+aribaPassword = 
+anaplanURL = 
+anaplanUsername = 
+anaplanPassword = 
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+2. Request: "Get import body":
+-----------------
+Adresse: ${property.anaplanURL}
+Methode: GET
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: keinen
+
+Response Handling: 
+- Der eingehende Body beinhaltet die zu importierenden Purchase Requests (CSV)
+
+3. Prüfen des Payloads:
+----------------------
+- Wenn der Body leer, nur Klammern, oder nur die CSV Header beinhaltet (siehe Validierungsregeln), als leeren String setzen. Ansonsten beibehalten.
+
+4. Umwandlung zu XML:
+--------------------
+Für alle validen Records:
+- Entferne die CSV Header
+- Seperator sind Kommata (,)
+- Ziel XSD ist das unten angegebene Output-Schema
+- Befolge die unten angegebenen Mapping-Anforderungen 
+
+5. Request: "Send Purchase Records":
+--------------------------
+Adresse: ${property.aribaURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Jeder Output-Body muss einzeln abgeschickt werden (siehe Mapping-Anforderungen)
+
+Response Handling:
+- Response in Message-Attachment loggen
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+
+
+Mapping-Anforderungen:
+- alle PR_Lines unter einer Request_ID zusammengefasst
+- für jede Request_ID ein eigener Output Body
+- Request_ID = REQUEST_ID
+- Anaplan_Line_Number = LINE_NO
+- Price = BUY_UNIT_PRICE
+- Wenn PR_PO_Status gleich "Change" ist, dann "Update", ansonsten Wert des Feldes PR_PO_Status = PR_PO_Status
+- "" = CURRENCY (leerer String) 
+
+
+Validierungsregeln:
+- CSV Header sind: PR_Creation_List,PR_PO_Status,Created_By,Request_ID,PR_Number,Unique_Key,Request_Name,Contract_Reference,Anaplan_Line_Number,PR_Line_Number,Quantity,Price,Supplier_Code,SKU,Deliver_To_Code,Need_By_Date
+
+
+Output: 
+<?xml version="1.0" encoding="UTF-8"?>
+<PURCHASE_REQUISITION>
+    <REQUEST_ID>REQ-20250526-001</REQUEST_ID>
+    <LINES>
+        <PURCHASE_REQUISITION_LINE>
+            <LINE_NO>1</LINE_NO>
+            <BUY_UNIT_PRICE>150.00</BUY_UNIT_PRICE>
+            <PR_PO_Status>Update</PR_PO_Status>
+            <CURRENCY></CURRENCY>
+        </PURCHASE_REQUISITION_LINE>
+        <PURCHASE_REQUISITION_LINE>
+            <LINE_NO>2</LINE_NO>
+            <BUY_UNIT_PRICE>299.99</BUY_UNIT_PRICE>
+            <PR_PO_Status>Approved</PR_PO_Status>
+            <CURRENCY></CURRENCY>
+        </PURCHASE_REQUISITION_LINE>
+    </LINES>
+</PURCHASE_REQUISITION>
+
+
+
+Output Schema:
+<?xml version="1.0" encoding="UTF-8"?><!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  <xs:element name="PURCHASE_REQUISITION">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="REQUEST_ID"/>
+        <xs:element name="LINES">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="PURCHASE_REQUISITION_LINE">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="LINE_NO"/>
+                    <xs:element name="BUY_UNIT_PRICE"/>
+                    <xs:element name="PR_PO_Status"/>
+					<xs:element name="CURRENCY"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+Input:
+PR_Creation_List,PR_PO_Status,Created_By,Request_ID,PR_Number,Unique_Key,Request_Name,Contract_Reference,Anaplan_Line_Number,PR_Line_Number,Quantity,Price,Supplier_Code,SKU,Deliver_To_Code,Need_By_Date
+ListA,Open,j.smith,REQ-001,PR-1001,UK-001,Office Supplies,CR-001,ALN-01,1,10,15.99,SUP-001,SKU-001,LOC-001,2025-06-01
+ListB,Approved,a.jones,REQ-002,PR-1002,UK-002,IT Equipment,CR-002,ALN-02,2,5,299.50,SUP-002,SKU-002,LOC-002,2025-07-15
+ListC,Change,m.taylor,REQ-003,PR-1001,UK-003,Marketing Materials,CR-003,ALN-03,3,20,8.75,SUP-003,SKU-003,LOC-003,2025-08-10
+ListA,Open,j.smith,REQ-001,PR-1001,UK-001,Office Supplies,CR-001,ALN-01,1,10,15.99,SUP-001,SKU-001,LOC-001,2025-06-01
+ListB,Approved,a.jones,REQ-002,PR-1002,UK-002,IT Equipment,CR-002,ALN-02,2,5,299.50,SUP-002,SKU-002,LOC-002,2025-07-15
+ListC,Change,m.taylor,REQ-003,PR-1001,UK-003,Marketing Materials,CR-003,ALN-03,3,20,8.75,SUP-003,SKU-003,LOC-003,2025-08-10
+ListA,Open,j.smith,REQ-001,PR-1001,UK-001,Office Supplies,CR-001,ALN-01,1,10,15.99,SUP-001,SKU-001,LOC-001,2025-06-01
+ListB,Approved,a.jones,REQ-002,PR-1002,UK-002,IT Equipment,CR-002,ALN-02,2,5,299.50,SUP-002,SKU-002,LOC-002,2025-07-15
+ListC,Change,m.taylor,REQ-003,PR-1001,UK-003,Marketing Materials,CR-003,ALN-03,3,20,8.75,SUP-003,SKU-003,LOC-003,2025-08-10
+ListA,Open,j.smith,REQ-001,PR-1001,UK-001,Office Supplies,CR-001,ALN-01,1,10,15.99,SUP-001,SKU-001,LOC-001,2025-06-01
+

@@ -1,0 +1,20 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Integrations-Skript: No such property: bp for class: groovy.xml.MarkupBuilder
+Possible solutions: mkp@ line 242 in script1.groovy.
+The MPL ID for the failed message is : AGhS-BhHetOB5F7HgoM9yq6oCKPt
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: Get Account – HTTP-Status 404 für UID placeholder@ line 248 in script3.groovy.
+The MPL ID for the failed message is : AGhS-tfvynm_Xj4ZYjlcM6fK9QK9
+
+-> Falscherweise
+-> konnte Pfad anscheinend nicht auflösen
+
+
+#4:
+Hat mehrere Event Objekte nicht erkannt und nur 1 Request abgeschickt
+
+
+#5:
+Hat mehrere Event Objekte nicht erkannt und nur 1 Request abgeschickt

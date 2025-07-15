@@ -1,0 +1,44 @@
+#1:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script1__Script.groovy: 249: expecting ')', found '!' @ line 249, column 16.
+if (rc !in [200, 201, 202]) {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhS2s_kyhZ_ZMC9YM7e2Oe8N6zY
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 238: expecting ')', found '!' @ line 238, column 16.
+if (rc !in [200, 201, 202, 204]) {
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhS4Z1YpkilR_qnjmSomvg2OgLj
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script4__Script.groovy: 10: unable to resolve class com.sap.gateway.ip.core.customdev.util.MessageLog
+@ line 10, column 1.
+import com.sap.gateway.ip.core.customdev.util.MessageLog
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhS4gr-OONv1dReSSO_9BImNFAs
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script5__Script.groovy: 93: unable to resolve class BusinessPartner
+@ line 93, column 30.
+def mapIncomingProfile = { BusinessPartner bp ->
+^
+
+1 error
+.
+The MPL ID for the failed message is : AGhS4ozU2NusHTyN3GqlXZBDrTbt

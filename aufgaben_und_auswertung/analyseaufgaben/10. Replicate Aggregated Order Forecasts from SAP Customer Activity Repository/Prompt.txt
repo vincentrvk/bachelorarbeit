@@ -1,0 +1,312 @@
+Du sollst ein Skript für die Integration von SAP Customer Activity erstellen. Es sollen Order Forcasts repliziert werden. 
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+requestUser = 
+requestPassword = 
+requestURL = 
+enableLogging = 
+enableMapping = 
+forecastCodeMap = {
+  "forecastCodeMap": {
+    "D": "Daily forecast",
+    "W": "Weekly forecast",
+    "M": "Monthly forecast",
+    "Q": "Quarterly forecast",
+    "A": "Annual forecast"
+  }
+}
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Entscheidung: Mapping:
+-------------------------
+- Wenn die property ${property.enableMapping} = true ist, führe das Request Mapping gemäß den Mapping-Anforderungen aus
+
+
+3. Entscheidung: Logging:
+-------------------------
+- Wenn die property ${property.enableLogging} = true ist, logge den vor der Request als Attachment als String
+
+
+4. Request "Replicate Forecasts":
+-----------------
+Adresse: ${property.requestURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request Mapping
+
+Response Handling: 
+- keins
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+
+Validierungsregeln:
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfeld -> Zielfeld
+
+entityVersion -> entityVersion (Objekt)
+Transformationsregel: 
+- Erstelle für die erste Zahl ein String mit dem Key "major" (Major-Release)
+- Erstelle für die zweite Zahl ein String mit dem Key "minor" (Minor-Release)
+- Erstelle für die dritte Zahl ein String mit dem Key "patch" (Patch-Release)
+
+id -> id
+Transformationsregel: 
+- Schreibe statt "PRODUCT-{Zahl}" statt "PROD-{Zahl}"
+
+supplyingPlant -> supplyingPlant
+Transformationsregel:
+- Füge ein "PLANT-" vor der Werksspezifischen Id ein
+
+forecastCode, ${property.forecastCodeMap} -> forecastCode
+Transformationsregel:
+- Mappe den Code gemäß der forecastCodeMap 
+
+productStagingStart -> productStagingStart
+Transformationsregel:
+- Konvertiere den Zeitstempel in das Format "DD.MM.YYYY HH:mm"
+
+versionTimestamp -> versionTimestamp
+Transformationsregel:
+- Konvertiere den UNIX Zeitstempel in das Format "YYYY-MM-DDTHH:mm:ssZ"
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+keins
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+{
+  "entityVersion": "2.0.0",
+  "value": [
+    {
+      "product": {
+        "id": "PROD-12345"
+      },
+      "supplyingPlant": {
+        "id": "1000"
+      },
+      "forecastCode": "A",
+      "aggregatedOrderQuantities": [
+        {
+          "productStagingStart": "2025-01-05T08:00:00Z"
+        }
+      ],
+      "versionTimestamp": 1735689600
+    }
+  ]
+}
+
+
+
+INPUT RESPONSE MAPPING:
+keins
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AggregatedOrderPlanResponse",
+  "type": "object",
+  "properties": {
+    "entityVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }
+            },
+            "required": ["id"]
+          },
+          "supplyingPlant": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }
+            },
+            "required": ["id"]
+          },
+          "forecastCode": {
+            "type": "string",
+            "maxLength": 1
+          },
+          "aggregatedOrderQuantities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productStagingStart": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["productStagingStart"]
+            }
+          },
+          "versionTimestamp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999999
+          }
+        },
+        "required": [
+          "product",
+          "supplyingPlant",
+          "forecastCode",
+          "aggregatedOrderQuantities",
+          "versionTimestamp"
+        ]
+      }
+    }
+  },
+  "required": ["entityVersion", "value"]
+}
+
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+keins
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+{
+  "entityVersion": {
+    "major": 2,
+    "minor": 0,
+    "patch": 1
+  },
+  "value": [
+    {
+      "product": {
+        "id": "PRODUCT-12345"
+      },
+      "supplyingPlant": {
+        "id": "PLANT-1000"
+      },
+      "forecastCode": "Annual forecast",
+      "aggregatedOrderQuantities": [
+        {
+          "productStagingStart": "31.12.2025 23:59"
+        }
+      ],
+      "versionTimestamp": "2025-01-01T00:00:00Z"
+    }
+  ]
+}
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+keins
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AggregatedOrderPlan",
+  "type": "object",
+  "properties": {
+    "entityVersion": {
+      "type": "object",
+      "properties": {
+        "major": { "type": "integer", "minimum": 0 },
+        "minor": { "type": "integer", "minimum": 0 },
+        "patch": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["major", "minor", "patch"]
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }
+            },
+            "required": ["id"]
+          },
+          "supplyingPlant": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }
+            },
+            "required": ["id"]
+          },
+          "forecastCode": {
+            "type": "string"
+          },
+          "aggregatedOrderQuantities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productStagingStart": {
+                  "type": "string",
+                  "description": "Expected format: DD.MM.YYYY HH:mm"
+                }
+              },
+              "required": ["productStagingStart"]
+            }
+          },
+          "versionTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "product",
+          "supplyingPlant",
+          "forecastCode",
+          "aggregatedOrderQuantities",
+          "versionTimestamp"
+        ]
+      }
+    }
+  },
+  "required": ["entityVersion", "value"]
+}
+
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+keins
+

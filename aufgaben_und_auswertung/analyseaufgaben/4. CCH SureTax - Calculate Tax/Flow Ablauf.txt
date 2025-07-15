@@ -1,0 +1,142 @@
+Properties:
+exchangeTTCodeFieldName = MATNR
+
+logging
+
+Exchange properties
+exchageCurrencyDecimal = /n0:TAX_CALCULATION_SEND/CALCULATION_HEADER/CURR_DEC/text()
+exchangeTransTypeCode = 
+exchangeTTCodeValueMap = {
+  "1001": "TT01",
+  "1002": "TT02",
+  "1003": "TT03"
+}
+currencyDecimalStr = 
+
+mapping
+
+Quellfelder -> Zielfelder:
+
+CURR_DEC (trim) -> /ns1:SoapRequest/ns1:request/*CurrencyDecimal
+
+AMOUNT, FREIGHT_AM -> /ns1:SoapRequest/ns1:request/ns1:TotalRevenue
+Transformationslogik:
+- Der Gesamtwert (total) berechnet sich aus der Summe aller Einträge aus amount[] und freight[].
+- Jeder Wert wird zunächst mit getNegativeNormal(String) verarbeitet, um negative Formate zu normalisieren.
+- Anschließend wird er in einen BigDecimal umgewandelt.
+- Die Zahl wird durch 10^currencyDecimalInt geteilt, wobei currencyDecimalInt standardmäßig 2 ist.
+- Falls die Property "exchageCurrencyDecimal" im MappingContext vorhanden ist, nimm diesen Wert passe entsprechend an (currencyDecimalVal = 10^currencyDecimalInt).
+- Diese Skalierung wird für jedes Element aus den Arrays amount und freight durchgeführt.
+- Fehlerhafte oder ungültige Werte (z. B. nicht parsebare Strings) werden übersprungen.
+- Die finale Summe wird mit BigDecimal.ROUND_HALF_EVEN auf currencyDecimalInt Dezimalstellen gerundet.
+- Rückgabe erfolgt als String
+
+ITEM_NO, ${property.exchangeTransTypeCode} -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/*transTypeCode
+Transformationslogik: 
+- Wenn es in der Map exchangeTTCodeValueMap (aus dem MappingContext) einen Eintrag für itemNo gibt: Gib den zugehörigen Transaktionstyp-Code zurück.
+- Sonst, wenn defaultTransTypeCode vorhanden und nicht leer ist: Gib defaultTransTypeCode zurück
+- Wenn nichts davon zutrifft: Gib einen leeren String zurück.
+
+AMOUNT, CurrencyDecimal (ist ein Zielfeld) -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/ns1:Revenue
+Regel AMOUNT: 
+Wenn der Eingabewert null ist: gib "" zurück. Wenn der Wert mit einem Minuszeichen am Ende endet (z. B. "500-"): setze das Minuszeichen an den Anfang (z.B. "-500"). In allen anderen Fällen: gib den getrimmten Originalwert zurück
+Regel CurrencyDecimal: 
+Standardwert: currencyDecimalToNumber = 100 (entspricht 10²)
+Wenn currencyDecimal nicht leer und eine gültige Zahl ist:
+Konvertiere sie in int
+Berechne 10 ^ currencyDecimalNumber (z. B. 3: 1000)
+Bei Fehlern (z. B. ungültige Eingabe) bleibt der Standardwert erhalten
+Transformationslogik: 
+- Rückgabe erfolgt als String: Teile das Ergebnis von AMOUNT durch das Ergebnis von CurrencyDecimal 
+
+EXEMPT_AMT, AMOUNT -> /ns1:SoapRequest/ns1:request/ns1:ItemList/ns1:Item/ns1:TaxExemptionCodeList/ns1:string
+Regel EXEMPT_AMT: Wenn EXEMPT_AMT existiert, nimm den Wert, ansonsten nutze eine "0"
+Transformationslogik: 
+- Negativform bereinigen: Beide Eingabewerte (AMOUNT, EXEMPT_AMT) werden mit getNegativeNormal() in normales Zahlenformat gebracht.
+- Dezimalstellen bestimmen:
+	- Standard: 2 Stellen: Faktor 100
+	- Falls verfügbar, wird exchageCurrencyDecimal aus dem Kontext gelesen und currencyDecimalVal = 10^AnzahlDezimalstellen gesetzt.
+- Befreiungsbetrag prüfen:
+	- EXEMPT_AMT wird durch currencyDecimalVal geteilt.
+	- Wenn das Ergebnis 0 ist: Rückgabe: "00", sonst
+- Befreiungsprozentsatz berechnen:
+	- AMOUNT ebenfalls skalieren.
+	- Prozentsatz berechnen: EXEMPT_AMT / AMOUNT (absolut).
+	- Rückgabe im Format: "06:[Prozentsatz]"
+
+logging
+
+request an SureTax
+
+logging
+
+Transformation xslt
+
+logging
+
+Transformation xslt
+
+logging
+
+mapping
+
+Quellfelder -> Zielfelder
+
+ns1:TaxAmount, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/CALCULATION_RESULT_ITEM/TAXAMOV
+Transformationslogik:
+- Bilde die Summe aus allen TaxAmount in TaxAmountList
+- Berechne den Skalierungsfaktor mithilfe von ${property.exchangeCurrencyDecimal}:
+	- Standardwerte: currencyDecimalInt = 2: entspricht 2 Nachkommastellen, currencyDecimalVal = 100: entspricht 10^2
+	- Property lesen: Hole den String-Wert aus ${property.exchangeCurrencyDecimal}
+	- Umwandeln und berechnen: Parse den String zu int: currencyDecimalInt = 3, Berechne den Faktor: z.B. currencyDecimalVal = 10 ^ 3 = 1000
+- Skalierungsfaktor mit Summe der TaxAmounts multiplizieren
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:LineNumber, ns1:Tax, ns1:TaxTypeCode -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/ITEM_NO
+Transformationslogik: 
+- Schreibe den Wert von ns1:LineNumber für jedes ns1:Tax das vorkommt
+
+ns1:Revenue, ns1:NumberOfTaxes, ns1:NumberOfGroups, ns1:PercentTaxable, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/EXAMT
+Transformationslogik:
+- Berechnung exemptAmount:
+	- Konvertiere numberOfGroups zu int: groupCount
+	- Konvertiere numberOfTaxes zu int: taxCount
+	- Berechne: countOfGroupTax = taxCount / groupCount 
+	- Konvertiere die Summe aus allen ns1:Revenue zu BigDecimal und teile durch countOfGroupTax
+- multipliziere exemptAmount mit ns1:PercentTaxable und ziehe das Ergebnis von exemptAmount selbst ab
+- Berechne den Skalierungsfaktor mithilfe von ${property.exchangeCurrencyDecimal}:
+	- Standardwerte: currencyDecimalInt = 2: entspricht 2 Nachkommastellen, currencyDecimalVal = 100: entspricht 10^2
+	- Property lesen: Hole den String-Wert aus ${property.exchangeCurrencyDecimal}
+	- Umwandeln und berechnen: Parse den String zu int: currencyDecimalInt = 3, Berechne den Faktor: z.B. currencyDecimalVal = 10 ^ 3 = 1000
+- das Ergebnis der Subtraktion mit dem Skalierungsfaktor multiplizieren
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:TaxAmount, ${property.exchangeCurrencyDecimal} -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/TAXAMT
+Transformationslogik:
+- Bilde die Summe aller TaxAmounts und multipliziere sie mit dem Skalierungsfaktor (wie oben berechnet)
+- Den Multiplizierten Wert noch transformieren:
+	- Wenn null: Ausgabe leerer String, wenn nicht
+	- Trimmen des Wertes (Leerzeichen entfernen)
+	- Wenn der erste Buchstabe ein Minus ist, das Minus ans Ende setzen
+	- Wenn kein Minus vorhanden ist, den Wert unverändert ausgeben
+
+ns1:ExemptCode -> /ns2:TAX_CALCULATION_RECEIVE/RESULT_ITEM_JUR/EXCODE
+
+
+
+
+Content modifier: items zählen
+
+logging
+
+
+
+

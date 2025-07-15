@@ -1,0 +1,213 @@
+Du sollst ein Skript für die Integration von S/4HANA Cloud und CCH Sure Tax bauen. In dieser Integration sollen die geänderten Einträge geholt werden.
+
+1. Header, Properties und Body
+--------------------
+Headers:
+
+Properties:
+sureTaxUsername = 
+sureTaxPassword = 
+sureTaxURL = 
+exchangejcdunifyind = /n0:TAX_JUR_GETCHANGELIST_SEND/JCD_UNIFY_IND/text()
+stateMap = [ "00":"US",
+     "01":"AL",
+     "02":"AK",
+     "03":"AL",
+     "04":"AZ",
+     "05":"AR",
+     "06":"CA" ]
+
+
+Sollten Properties und Header bereits im Message-Objekt vorhanden sein, befülle die Variablen mit den vorhandenen Werten. Ist ein Wert nicht zu finden benutze "placeholder".
+
+
+2. Request "Get Changed":
+-----------------
+Adresse: ${property.sureTaxURL}
+Methode: POST
+Authentifizierung: Basic-Authentication
+Header: keine
+Body: Payload nach Request-Mapping
+
+Response Handling: 
+- Die Antwort muss gemäß den Regeln des Response-Mappings behandelt werden
+
+3. Logging:
+----------------------
+- Folgende Schritte müssen geloggt und als Message-Attachment (als String) angehangen werden:
+	1. Eingehender Payload
+	2. Nach dem Request-Mapping 
+	3. Response Payload
+	4. Nach dem Response-Mapping
+
+
+Modularität-Anforderungen:
+1. Schreibe eine separate Funktion für jeden API-Call
+2. Schreibe eine separate Funktion für das Mapping
+3. Schreibe eine separate Funktion zum festlegen der Werte (Headers & Properties)
+4. Schreibe eine separate Funktion für das Error Handling
+5. Schreibe eine separate Funktion für das Logging
+
+Validierungsregeln:
+- Property ${property.exchangejcdunifyind} muss vorhanden sein, sonst Fehlermeldung werfen (required)
+
+
+Mapping-Anforderungen:
+REQUEST-MAPPING:
+Quellfeld -> Zielfeld
+
+ns2:TAX_JUR_GETCHANGELIST_SEND -> /ns3:GetAllGeocodes (nur Erstellung der Node)
+
+${property.sureTaxUsername} -> /ns3:GetAllGeocodes/ns3:ClientNumber
+
+${property.sureTaxPassword} -> /ns3:GetAllGeocodes/ns3:ValidationKey
+
+
+
+RESPONSE-MAPPING:
+Quellfeld -> Zielfeld
+
+ns0:string, ${property.exchangejcdunifyind}, ${property.stateMap} -> /ns2:TAX_JUR_GETCHANGELIST_RECEIVE/TAX_JURI_CODE/TXJCD
+Transformationsregeln:
+- Wenn ${property.exchangejcdunifyind} = "X" und die ersten 2 Zeichen aus ns0:string "ZZ" sind, schreibe den Zielwert als "US"+ns0:string
+- Wenn ${property.exchangejcdunifyind} = "X" und die ersten 2 Zeichen aus ns0:string "US" sind,
+	- mappe Zeichen 3 bis 4 auf die stateMap
+	- schreibe die gemappten Zeichen zwischen Zeichen 2 und 3 von ns0:string und schreibe ein "-" ans Ende des Strings
+- Wenn ${property.exchangejcdunifyind} ungleich "X", schreibe ns0:string als Zielwert 
+
+
+---
+Input:
+INPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<TAX_JUR_GETCHANGELIST_SEND>
+	<JCD_UNIFY_IND>X</JCD_UNIFY_IND>
+</TAX_JUR_GETCHANGELIST_SEND>
+
+
+
+INPUT RESPONSE MAPPING:
+<ns0:GetAllGeocodesResponse xmlns:ns0="http://tempuri.org/">
+  <ns0:GetAllGeocodesResult>
+    <ns0:string>US1234512331</ns0:string>
+    <ns0:string>ZZ0333367890</ns0:string>
+    <ns0:string>ZZ9999999999</ns0:string>
+  </ns0:GetAllGeocodesResult>
+</ns0:GetAllGeocodesResponse>
+
+
+
+Input-Schema:
+INPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://sap.com/xi/FotETaxUS" 
+    xmlns="http://sap.com/xi/FotETaxUS" 
+    elementFormDefault="qualified">
+
+  <xs:element name="TAX_JUR_GETCHANGELIST_SEND">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="JCD_UNIFY_IND" minOccurs="1" maxOccurs="1">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:length value="1"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+
+
+
+
+INPUT SCHEMA RESPONSE MAPPING:
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns0="http://tempuri.org/"
+           targetNamespace="http://tempuri.org/"
+           elementFormDefault="qualified">
+  <xs:element name="GetAllGeocodesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="GetAllGeocodesResult">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="string" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+
+
+Output: 
+OUTPUT REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:GetAllGeocodes xmlns:ns3="http://soa.noventic.com/GeocodeService/GeocodeService-V1">
+  <ns3:ClientNumber>123456</ns3:ClientNumber>
+  <ns3:ValidationKey>ABCDEF123456</ns3:ValidationKey>
+</ns3:GetAllGeocodes>
+
+
+
+
+OUTPUT RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:TAX_JUR_GETCHANGELIST_RECEIVE xmlns:ns2="http://sap.com/xi/FotETaxUS">
+  <ns2:TAX_JURI_CODE>
+    <ns2:TXJCD>US123456789</ns2:TXJCD>
+    <ns2:TXJCD>US987654321</ns2:TXJCD>
+  </ns2:TAX_JURI_CODE>
+</ns2:TAX_JUR_GETCHANGELIST_RECEIVE>
+
+
+
+Output Schema:
+OUTPUT SCHEMA REQUEST MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns3="http://soa.noventic.com/GeocodeService/GeocodeService-V1"
+           targetNamespace="http://soa.noventic.com/GeocodeService/GeocodeService-V1"
+           elementFormDefault="qualified">
+  <xs:element name="GetAllGeocodes" type="ns3:GetAllGeocodesType"/>
+  <xs:complexType name="GetAllGeocodesType">
+    <xs:sequence>
+      <xs:element name="ClientNumber" type="xs:string"/>
+      <xs:element name="ValidationKey" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+
+
+OUTPUT SCHEMA RESPONSE MAPPING:
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://sap.com/xi/FotETaxUS"
+           xmlns:ns2="http://sap.com/xi/FotETaxUS"
+           elementFormDefault="qualified">
+  <xs:element name="TAX_JUR_GETCHANGELIST_RECEIVE" type="ns2:TAX_JUR_GETCHANGELIST_RECEIVE"/>
+  <xs:complexType name="TAX_JUR_GETCHANGELIST_RECEIVE">
+    <xs:sequence>
+      <xs:element name="TAX_JURI_CODE" minOccurs="0" type="ns2:TAX_JURI_CODE"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TAX_JURI_CODE">
+    <xs:sequence>
+      <xs:element name="TXJCD" minOccurs="0" maxOccurs="unbounded">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:maxLength value="15"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,23 @@
+logging
+
+Content modifier
+(properties)
+
+mapping (request)
+
+logging
+
+Content modifier 
+(URL)
+
+request
+
+logging
+
+xslt mapping (add geocode)
+
+logging
+
+mapping (Response)
+
+logging

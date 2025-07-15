@@ -1,0 +1,63 @@
+#1:
+Kein Body bei Activate Outbound Call, ansonsten alles korrekt
+
+
+#2:
+Alles hat funktioniert, außer die Erkennung ob ein Business Partner bereits existiert (/Update nicht für eingehenden Body gecallt)
+
+
+#3:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script3__Script.groovy: 152: The current scope already contains a variable of the name icmType
+@ line 152, column 38.
+ICMContractingPartyType icmType
+^
+
+script3__Script.groovy: 153: The current scope already contains a variable of the name externalId
+@ line 153, column 37.
+ICMExternalId externalId
+^
+
+script3__Script.groovy: 154: The current scope already contains a variable of the name name
+@ line 154, column 37.
+Name name
+^
+
+script3__Script.groovy: 157: The current scope already contains a variable of the name countryCode
+@ line 157, column 37.
+DisplayValue countryCode
+^
+
+script3__Script.groovy: 152: unable to resol…
+
+
+#4:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: java.lang.RuntimeException: Fehler im Groovy-Skript: Fehler im Groovy-Skript: BusinessPartner fällt durch Validierungsregel – InternalID <= 999.@ line 270 in script4.groovy.
+The MPL ID for the failed message is : AGhScygoQPFM_-TKBD-JRE-TF0U_
+
+--> FALSCHE Erkennung, InternalID war 1001
+
+
+#5:
+com.sap.it.rt.adapter.http.api.exception.HttpResponseException: An internal server error occured: startup failed:
+script5__Script.groovy: 122: The current scope already contains a variable of the name contractingPartyType
+@ line 122, column 37.
+ICMContractingPartyType contractingPartyType
+^
+
+script5__Script.groovy: 123: The current scope already contains a variable of the name externalId
+@ line 123, column 37.
+ICMExternalId externalId
+^
+
+script5__Script.groovy: 124: The current scope already contains a variable of the name name
+@ line 124, column 37.
+Name name
+^
+
+script5__Script.groovy: 127: The current scope already contains a variable of the name country
+@ line 127, column 37.
+DisplayValue country
+^
+
+script5__Script.groovy: 122:...

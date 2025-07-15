@@ -15,7 +15,7 @@ aufgaben_und_auswertung/
 ├── plot_forest_bausteine.py
 └── README.md          ← Anleitung zur Reproduktion der Forest Plots und Bausteinvorkommen-Analyse
 analyseaufgaben/
-└── … ← Enthält die automatisiert generierten Skripte für alle 29 Integrationsaufgaben, inkl. dazugehörige Mock-Skripte der externen Systeme
+└── … ← Enthält die automatisiert generierten Skripte für alle 29 Integrationsaufgaben, inkl. Prompts und dazugehörige Mock-Skripte der externen Systeme
 README.md              ← diese Datei
 ```
 

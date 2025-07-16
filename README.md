@@ -6,17 +6,17 @@ Dieses Repository enthält alle Daten und Skripte, die in der Bachelorarbeit
 ### Ordnerstruktur
 ```text
 aufgaben_und_auswertung/
-├── Aufgaben.xlsx ← Enthält alle Rohdaten und in Excel ausgeführten Berechnungen und generierte Grafiken
+├── analyseaufgaben/ ← Enthält die automatisiert generierten Skripte für alle 29 Integrationsaufgaben, inkl. Prompts und dazugehörige Mock-Skripte der externen Systeme
+├── Aufgaben.xlsx ← Enthält alle Rohdaten, die in Excel ausgeführten Berechnungen und die generierten Grafiken
 ├── variants_sortiert.csv
 ├── reg_sum.csv
 ├── reg_presence.csv
 ├── build_variants_sortiert.py
 ├── analyse_bausteine.py
 ├── plot_forest_bausteine.py
-├── promptstruktur_und_api_calls.txt ← Ausschnitt des genutzten API-Calls, Dokumentationslinks und Prompt-Struktur
 └── README.md          ← Anleitung zur Reproduktion der Forest Plots und Bausteinvorkommen-Analyse
-analyseaufgaben/
-└── … ← Enthält die automatisiert generierten Skripte für alle 29 Integrationsaufgaben, inkl. Prompts und dazugehörige Mock-Skripte der externen Systeme
+referenzdateien/ ← Enthält die genutzten Referenzdateien
+promptstruktur_und_api_calls.txt ← Ausschnitt des genutzten API-Calls, Dokumentationslinks und Prompt-Struktur
 README.md              ← diese Datei
 ```
 
